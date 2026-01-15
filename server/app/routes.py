@@ -9,30 +9,19 @@ def home():
         "message": "Welcome to the SHIELD Doctor API!"
         }), 200
 
-@app.route('/test')
-def test_route():
-    return jsonify({
-        "status": "success",
-        "message": "Test route is working!"
-        }), 200
-
-@app.route('/test-db')
+@app.route('/users')
 def test_db_connection():
-    conn = get_db_connection()
-    if conn:
-        cur = conn.cursor()
-        
-        cur.execute("SELECT version();")
-        result = cur.fetchone()
-        
-        cur.close()
-        conn.close()
-        return jsonify({
-            "status": "success",
-            "message": f"Database connected successfully! Version: {result[0]}"
-            }), 200
-    else:
-        return jsonify({
-            "status": "error",
-            "message": "Failed to connect to the database."
-            }), 500
+    conn = get_db_connection() 
+    if conn: 
+        cur = conn.cursor() 
+        try: 
+            cur.execute("SELECT * FROM users;") 
+            result = cur.fetchone() 
+            cur.close() 
+            conn.close() 
+            
+            return jsonify({ "status": "success", "message": f"Users retrieved successfully! First row: {result}" }), 200 
+        except Exception as e: 
+            return jsonify({ "status": "error", "message": f"Query failed: {e}" }), 500 
+    else: 
+        return jsonify({ "status": "error", "message": "Failed to connect to the database." }), 500
