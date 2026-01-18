@@ -27,6 +27,7 @@ def test_db_connection():
     else: 
         return jsonify({ "status": "error", "message": "Failed to connect to the database." }), 500
     
+    
 # Creating POST risk scores route
 @app.route('/api/v1/risk-scores', methods=['POST'])
 def log_risk():
@@ -54,4 +55,5 @@ def log_risk():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
     finally:
-        if conn: conn.close()
+        if conn: 
+            conn.close()
