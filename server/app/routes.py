@@ -2,6 +2,8 @@ from app import app
 from flask import json, jsonify, request
 from app.db import get_db_connection
 from psycopg2.extras import RealDictCursor
+import logging
+import uuid
 
 @app.route('/')
 def home():
@@ -212,3 +214,150 @@ def get_latest_vitals():
     finally:
         if conn:
             conn.close()
+
+#Create POST patient api endpoint
+@app.route('/api/v1/patient', methods=['POST'])
+def create_patient():
+    data = request.get_json()
+
+    patient_uuid = str(uuid.uuid4())
+    name = data['name']
+    age = data['age']
+    height = data['height']
+    weight = data['weight']
+    dob = data['dob']
+    phone = data['phone_number']
+    email = data['email']
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            INSERT INTO patients 
+            (uuid, name, age, height, weight, dob, phone_number, email)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            patient_uuid, name, age, height, weight, dob, phone, email
+        ))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        return jsonify({
+            "status": "success",
+            "patient_uuid": patient_uuid
+        }), 201
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": str(e)}), 500
+
+# Create GET patient details based on UUID endpoint
+@app.route('/api/v1/patient', methods=['GET'])
+def get_patient_by_uuid():
+    patient_uuid = request.args.get('uuid')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT uuid, name, age, height, weight, dob, phone_number, email
+        FROM patients
+        WHERE uuid = %s
+    """, (patient_uuid,))
+
+    patient = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if patient:
+        return jsonify({
+            "uuid": patient[0],
+            "name": patient[1],
+            "age": patient[2],
+            "height": patient[3],
+            "weight": patient[4],
+            "dob": str(patient[5]),
+            "phone_number": patient[6],
+            "email": patient[7]
+        }), 200
+    else:
+        return jsonify({"message": "Patient not found"}), 404
+
+# Create GET patients assigned to doctor endpoint
+@app.route('/api/v1/patient-doctor', methods=['POST'])
+def get_patients_for_doctor():
+    data = request.get_json()
+    doctor_id = data['doctor_id']
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT p.uuid, p.name, p.age
+        FROM patients p
+        JOIN DoctorAssigned d
+        ON p.uuid = d.patient_uuid
+        WHERE d.doctor_id = %s
+    """, (doctor_id,))
+
+    patients = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    result = []
+    for p in patients:
+        result.append({
+            "uuid": p[0],
+            "name": p[1],
+            "age": p[2]
+        })
+
+    return jsonify({
+        "doctor_id": doctor_id,
+        "patients": result
+    }), 200
+
+# Create Error Handlers
+@app.errorhandler(400)
+def bad_request(error):
+    logging.warning(f"400 Bad Request: {error}")
+    return jsonify({
+        "error": "Bad Request",
+        "message": "Invalid or missing request data"
+    }), 400
+
+@app.errorhandler(401)
+def unauthorized(error):
+    logging.warning(f"401 Unauthorized: {error}")
+    return jsonify({
+        "error": "Unauthorized",
+        "message": "Authentication required"
+    }), 401
+
+@app.errorhandler(403)
+def forbidden(error):
+    logging.warning(f"403 Forbidden: {error}")
+    return jsonify({
+        "error": "Forbidden",
+        "message": "You do not have permission to access this resource"
+    }), 403
+
+@app.errorhandler(404)
+def not_found(error):
+    logging.warning(f"404 Not Found: {error}")
+    return jsonify({
+        "error": "Not Found",
+        "message": "The requested resource was not found"
+    }), 404
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    logging.error(f"500 Internal Server Error: {error}")
+    return jsonify({
+        "error": "Internal Server Error",
+        "message": "Something went wrong on the server"
+    }), 500
+
