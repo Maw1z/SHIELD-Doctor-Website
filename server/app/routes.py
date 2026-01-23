@@ -215,55 +215,66 @@ def get_latest_vitals():
         if conn:
             conn.close()
 
-#Create POST patient api endpoint
+# Create POST patient api endpoint
 @app.route('/api/v1/patient', methods=['POST'])
 def create_patient():
     data = request.get_json()
 
-    patient_uuid = str(uuid.uuid4())
-    name = data['name']
-    age = data['age']
-    height = data['height']
-    weight = data['weight']
-    dob = data['dob']
-    phone = data['phone_number']
-    email = data['email']
+    patient_uuid = data.get('uuid')
+    if not patient_uuid:
+        return jsonify({"error": "uuid is required"}), 400
+
+    name = data.get('name')
+    dob = data.get('dob')
+
+    if not name or not dob:
+        return jsonify({"error": "name and dob are required"}), 400
+
+    height = data.get('height')
+    weight = data.get('weight')
+    phone = data.get('phone_number')
+    email = data.get('email')
+    gender = data.get('gender')
 
     conn = get_db_connection()
     cur = conn.cursor()
 
     try:
         cur.execute("""
-            INSERT INTO patients 
-            (uuid, name, age, height, weight, dob, phone_number, email)
+            INSERT INTO patients
+            (uuid, name, height, weight, dob, phone_number, email, gender)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (
-            patient_uuid, name, age, height, weight, dob, phone, email
+            patient_uuid, name, height, weight, dob, phone, email, gender
         ))
 
         conn.commit()
-        cur.close()
-        conn.close()
 
         return jsonify({
             "status": "success",
             "patient_uuid": patient_uuid
         }), 201
 
-    except Exception as e:
+    except Exception:
         conn.rollback()
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Internal server error"}), 500
+
+    finally:
+        cur.close()
+        conn.close()
 
 # Create GET patient details based on UUID endpoint
 @app.route('/api/v1/patient', methods=['GET'])
 def get_patient_by_uuid():
     patient_uuid = request.args.get('uuid')
+    if not patient_uuid:
+        return jsonify({"error": "uuid is required"}), 400
 
     conn = get_db_connection()
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT uuid, name, age, height, weight, dob, phone_number, email
+        SELECT uuid, name, height, weight, dob, phone_number, email, gender
         FROM patients
         WHERE uuid = %s
     """, (patient_uuid,))
@@ -272,34 +283,45 @@ def get_patient_by_uuid():
     cur.close()
     conn.close()
 
-    if patient:
-        return jsonify({
-            "uuid": patient[0],
-            "name": patient[1],
-            "age": patient[2],
-            "height": patient[3],
-            "weight": patient[4],
-            "dob": str(patient[5]),
-            "phone_number": patient[6],
-            "email": patient[7]
-        }), 200
-    else:
+    if not patient:
         return jsonify({"message": "Patient not found"}), 404
+
+    return jsonify({
+        "uuid": patient[0],
+        "name": patient[1],
+        "height": patient[2],
+        "weight": patient[3],
+        "dob": str(patient[4]),
+        "phone_number": patient[5],
+        "email": patient[6],
+        "gender": patient[7]
+    }), 200
+
 
 # Create GET patients assigned to doctor endpoint
 @app.route('/api/v1/patient-doctor', methods=['POST'])
 def get_patients_for_doctor():
     data = request.get_json()
-    doctor_id = data['doctor_id']
+    doctor_id = data.get('doctor_id')
+
+    if not doctor_id:
+        return jsonify({"error": "doctor_id is required"}), 400
 
     conn = get_db_connection()
     cur = conn.cursor()
 
     cur.execute("""
-        SELECT p.uuid, p.name, p.age
+        SELECT 
+            p.uuid,
+            p.name,
+            DATE_PART('year', AGE(p.dob)) AS age,
+            p.height,
+            p.weight,
+            p.gender,
+            p.phone_number
         FROM patients p
         JOIN DoctorAssigned d
-        ON p.uuid = d.patient_uuid
+            ON p.uuid = d.patient_uuid
         WHERE d.doctor_id = %s
     """, (doctor_id,))
 
@@ -307,17 +329,16 @@ def get_patients_for_doctor():
     cur.close()
     conn.close()
 
-    result = []
-    for p in patients:
-        result.append({
-            "uuid": p[0],
-            "name": p[1],
-            "age": p[2]
-        })
-
     return jsonify({
         "doctor_id": doctor_id,
-        "patients": result
+        "patients": [
+            {
+                "uuid": p[0],
+                "name": p[1],
+                "age": int(p[2])
+            }
+            for p in patients
+        ]
     }), 200
 
 # Create Error Handlers
