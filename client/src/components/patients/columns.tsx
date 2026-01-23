@@ -9,6 +9,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useNavigate } from "react-router-dom";
 
 const statusColors = {
   Stable: "bg-green-500",
@@ -16,7 +17,7 @@ const statusColors = {
   Critical: "bg-red-500",
 };
 
-export const columns: ColumnDef<Patient>[] = [
+export const allColumns: ColumnDef<Patient>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
@@ -28,6 +29,23 @@ export const columns: ColumnDef<Patient>[] = [
         Patient Name
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
+    ),
+  },
+  {
+    accessorKey: "dob",
+    header: "Date of Birth",
+    cell: ({ row }) => <div className="text-sm">{row.getValue("dob")}</div>,
+  },
+  {
+    accessorKey: "gender",
+    header: "Gender",
+    cell: ({ row }) => <div className="text-sm">{row.getValue("gender")}</div>,
+  },
+  {
+    accessorKey: "phone_number",
+    header: "Phone",
+    cell: ({ row }) => (
+      <div className="text-sm">{row.getValue("phone_number")}</div>
     ),
   },
   {
@@ -54,18 +72,37 @@ export const columns: ColumnDef<Patient>[] = [
   },
   {
     id: "actions",
-    cell: () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem>View Profile</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    cell: ({ row }) => {
+      const patient = row.original;
+      const navigate = useNavigate();
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() => navigate(`/patients/${patient.id}`)}
+              className="cursor-pointer"
+            >
+              View Profile
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
   },
 ];
+
+export const dashboardColumns: ColumnDef<Patient>[] = [
+  allColumns[0], // name
+  allColumns[7], // status
+  allColumns[8], // lastCheck
+  allColumns[9], // actions
+];
+
+export const columns = dashboardColumns;

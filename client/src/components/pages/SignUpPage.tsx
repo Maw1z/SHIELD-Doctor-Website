@@ -1,13 +1,11 @@
-import { useState } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig";
 import { useNavigate, Link } from "react-router-dom";
 
-// Phone Input
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 
-// Shadcn Select Components
 import {
   Select,
   SelectContent,
@@ -53,7 +51,7 @@ export default function SignUpPage() {
 
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
@@ -61,7 +59,7 @@ export default function SignUpPage() {
     setFormData({ ...formData, specialization: value });
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
     if (!formData.specialization) {
       setError("Please select a specialization");

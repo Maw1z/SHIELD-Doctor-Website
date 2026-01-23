@@ -1,11 +1,13 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 
 import LoginPage from "@/components/pages/LoginPage";
 import SignUpPage from "@/components/pages/SignUpPage";
 import HomePage from "@/components/pages/HomePage";
-import PatientPage from "@/components/pages/PatientPage";
+import AllPatientsPage from "@/components/pages/AllPatientsPage";
 import AppointmentsPage from "./components/pages/AppointmentsPage";
+import PatientDetailsPage from "@/components/pages/PatientDetailsPage";
+import NotFoundPage from "@/components/pages/NotFoundPage";
 
 import { type User, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig";
@@ -26,7 +28,7 @@ function App() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
-        <p>Loading...</p>
+        <p className="animate-pulse text-muted-foreground">Loading...</p>
       </div>
     );
   }
@@ -47,14 +49,19 @@ function App() {
           element={user ? <HomePage /> : <Navigate to="/login" />}
         />
         <Route
-          path="/patient"
-          element={user ? <PatientPage /> : <Navigate to="/login" />}
+          path="/patients"
+          element={user ? <AllPatientsPage /> : <Navigate to="/forbidden" />}
+        />
+        <Route
+          path="/patients/:id"
+          element={user ? <PatientDetailsPage /> : <Navigate to="/forbidden" />}
         />
         <Route
           path="/appointment"
-          element={user ? <AppointmentsPage /> : <Navigate to="/login" />}
+          element={user ? <AppointmentsPage /> : <Navigate to="/forbidden" />}
         />
         <Route path="/" element={<Navigate to="/home" />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   );

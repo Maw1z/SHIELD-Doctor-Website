@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -7,6 +7,7 @@ import {
   useReactTable,
   type SortingState,
   type ColumnFiltersState,
+  type ColumnDef,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -17,14 +18,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { columns } from "./columns";
-import { MOCK_PATIENTS } from "@/constants/patients";
+import { dashboardColumns } from "./columns";
+import { MOCK_PATIENTS, type Patient } from "@/constants/patients";
 
-export function CustomPatientTable() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    [],
-  );
+interface CustomPatientTableProps {
+  columns?: ColumnDef<Patient>[];
+}
+
+export function CustomPatientTable({
+  columns = dashboardColumns,
+}: CustomPatientTableProps) {
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
     data: MOCK_PATIENTS,

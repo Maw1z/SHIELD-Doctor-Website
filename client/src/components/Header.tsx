@@ -17,7 +17,7 @@ export default function Header() {
 
   const navItems = [
     { label: "Dashboard", path: "/home", icon: LayoutDashboard },
-    { label: "Patients", path: "/patient", icon: Users },
+    { label: "Patients", path: "/patients", icon: Users },
     { label: "Appointments", path: "/appointment", icon: CalendarDays },
   ];
 
