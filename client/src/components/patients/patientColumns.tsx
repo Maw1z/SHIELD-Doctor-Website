@@ -86,7 +86,7 @@ export const allColumns: ColumnDef<Patient>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigate(`/patients/${patient.id}`)}
+              onClick={() => navigate(`/patients/${patient.uuid}`)}
               className="cursor-pointer"
             >
               View Profile

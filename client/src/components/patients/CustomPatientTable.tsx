@@ -27,6 +27,11 @@ interface CustomPatientTableProps {
   columns?: ColumnDef<Patient>[];
 }
 
+interface ApiResponse {
+  doctor_uuid: string;
+  patients: Patient[];
+}
+
 export function CustomPatientTable({
   columns = dashboardColumns,
 }: CustomPatientTableProps) {
@@ -56,14 +61,16 @@ export function CustomPatientTable({
 
         const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
 
-        const response = await axios.get<Patient[]>(
+        // 1. Update the generic type to match your JSON structure
+        const response = await axios.get<ApiResponse>(
           `${baseUrl}/v1/patient-doctor`,
           {
-            params: { doctor_uuid: "loqRHSKxgyWXMYTirfDGsOk4s3f2" },
+            params: { doctor_uuid: doctorUuid },
           },
         );
 
-        setData(response.data);
+        // 2. Access the nested patients array
+        setData(response.data.patients);
         setError(null);
       } catch (err) {
         console.error("Axios error:", err);

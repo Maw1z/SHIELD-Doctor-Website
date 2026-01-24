@@ -1,4 +1,6 @@
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +12,7 @@ import {
   FileText,
   Contact2,
   Fingerprint,
+  Loader2,
 } from "lucide-react";
 
 import Header from "../Header";
@@ -20,17 +23,54 @@ import PatientDetails from "../patient_details/PatientDetails";
 import MonitoringStatus from "../patient_details/MonitoringStatus";
 import DoctorNotes from "../patient_details/DoctorNotes";
 import UpcomingAppointments from "../patient_details/UpcomingAppointments";
+import PatientNotFoundPage from "./PatientNotFoundPage";
 
-import { MOCK_PATIENTS } from "@/constants/patients";
+import { type Patient } from "@/constants/patients";
 
 export default function PatientDetailsPage() {
   const { id } = useParams<{ id: string }>();
-
-  const patient = MOCK_PATIENTS.find((p) => p.id === id);
-
   const navigate = useNavigate();
 
-  if (!patient) return <div className="p-8 text-center">Patient not found</div>;
+  const [patient, setPatient] = useState<Patient | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const fetchPatientData = async () => {
+      if (!id) return;
+
+      try {
+        setIsLoading(true);
+        const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
+
+        const response = await axios.get<Patient>(`${baseUrl}/v1/patient`, {
+          params: { uuid: id },
+        });
+
+        setPatient(response.data);
+        setError(false);
+      } catch (err) {
+        console.error("Error fetching patient:", err);
+        setError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPatientData();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error || !patient) {
+    return <PatientNotFoundPage />;
+  }
 
   return (
     <div className="relative min-h-screen w-full">
