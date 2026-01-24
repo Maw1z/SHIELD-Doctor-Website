@@ -284,43 +284,65 @@ def get_patient_by_uuid():
 
 
 # Create GET patients assigned to doctor endpoint
-@app.route('/api/v1/patient-doctor', methods=['POST'])
+@app.route('/api/v1/patient-doctor', methods=['GET'])
 def get_patients_for_doctor():
-    data = request.get_json()
-    doctor_id = data.get('doctor_id')
+    doctor_uuid = request.args.get('doctor_uuid')
 
-    if not doctor_id:
-        return jsonify({"error": "doctor_id is required"}), 400
+    if not doctor_uuid:
+        return jsonify({
+            "error": "Validation Error",
+            "message": "doctor_uuid query parameter is required"
+        }), 400
 
-    conn = get_db_connection()
-    cur = conn.cursor()
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
 
-    cur.execute("""
-        SELECT 
-            p.uuid,
-            p.name,
-            DATE_PART('year', AGE(p.dob)) AS age,
-            p.height,
-            p.weight,
-            p.gender,
-            p.phone_number
-        FROM patients p
-        JOIN DoctorAssigned d
-            ON p.uuid = d.patient_uuid
-        WHERE d.doctor_id = %s
-    """, (doctor_id,))
+        cur.execute("""
+            SELECT 
+                p.uuid,
+                p.name,
+                p.dob,
+                p.height,
+                p.weight,
+                p.gender,
+                p.phone_number
+            FROM patients p
+            JOIN DoctorAssigned d
+                ON p.uuid = d.patient_uuid
+            WHERE d.doctor_uuid = %s
+        """, (doctor_uuid,))
 
-    patients = cur.fetchall()
-    cur.close()
-    conn.close()
+        patients = cur.fetchall()
+
+    except Exception as e:
+        # global handler deals with it
+        raise e
+
+    finally:
+        if cur:
+            cur.close()
+        if conn:
+            conn.close()
+
+    if not patients:
+        return jsonify({
+            "doctor_uuid": doctor_uuid,
+            "patients": [],
+            "message": "No patients found for this doctor"
+        }), 200
 
     return jsonify({
-        "doctor_id": doctor_id,
+        "doctor_uuid": doctor_uuid,
         "patients": [
             {
                 "uuid": p[0],
                 "name": p[1],
-                "age": int(p[2])
+                "dob": p[2],
+                "height": p[3],
+                "weight": p[4],
+                "gender": p[5],
+                "phone_number": p[6]
             }
             for p in patients
         ]
