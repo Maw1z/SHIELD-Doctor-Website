@@ -309,7 +309,7 @@ def get_patients_for_doctor():
                 p.phone_number
             FROM patients p
             JOIN doctor_assigned d
-                ON p.uuid = d.patient_uuid
+                ON p.uuid = d.patient_id
             WHERE d.doctor_id = %s
         """, (doctor_uuid,))
 
@@ -338,7 +338,7 @@ def get_patients_for_doctor():
             {
                 "uuid": p[0],
                 "name": p[1],
-                "dob": p[2],
+                "dob": p[2].isoformat() if p[2] else None,
                 "height": p[3],
                 "weight": p[4],
                 "gender": p[5],
