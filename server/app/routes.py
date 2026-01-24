@@ -228,7 +228,7 @@ def create_patient():
         cur.execute("""
             INSERT INTO patients
             (uuid, name, height, weight, dob, phone_number, email, gender)
-            VALUES (%s::uuid, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             patient_uuid, name, height, weight, dob, phone, email, gender
         ))
