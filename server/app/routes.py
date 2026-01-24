@@ -311,8 +311,8 @@ def get_patients_for_doctor():
                 a.patient_last_checked
             FROM patients p
             JOIN doctor_assigned d ON p.uuid = d.patient_id
-            JOIN risk_assessments r ON p.uuid = r.patient_id
-            JOIN appointments a ON p.uuid = a.patient_id
+            LEFT JOIN risk_assessments r ON p.uuid = r.patient_id
+            LEFT JOIN appointments a ON p.uuid = a.patient_id
             WHERE d.doctor_id = %s
         """, (doctor_uuid,))
 
