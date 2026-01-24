@@ -308,7 +308,7 @@ def get_patients_for_doctor():
                 p.gender,
                 p.phone_number
             FROM patients p
-            JOIN DoctorAssigned d
+            JOIN doctor_assigned d
                 ON p.uuid = d.patient_uuid
             WHERE d.doctor_uuid = %s
         """, (doctor_uuid,))
