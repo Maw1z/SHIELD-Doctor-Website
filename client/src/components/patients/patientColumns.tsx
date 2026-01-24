@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import { getStatusFromScore } from "@/utils/getStatusFromScore";
 
 const statusColors = {
   Stable: "bg-green-500",
@@ -49,26 +50,36 @@ export const allColumns: ColumnDef<Patient>[] = [
     ),
   },
   {
-    accessorKey: "status",
+    accessorKey: "risk_score",
     header: "Status",
     cell: ({ row }) => {
-      const status = row.getValue("status") as keyof typeof statusColors;
+      const score = row.getValue("risk_score") as number;
+      const status = getStatusFromScore(score);
       return (
         <div className="flex gap-2 items-center">
           <div className={`w-2 h-2 rounded-full ${statusColors[status]}`} />
-          {status}
+          <span className="text-sm">{status}</span>
         </div>
       );
     },
   },
   {
-    accessorKey: "lastCheck",
+    accessorKey: "patient_last_checked",
     header: "Last Check",
-    cell: ({ row }) => (
-      <div className="text-muted-foreground text-xs">
-        {row.getValue("lastCheck")}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const date = row.getValue("patient_last_checked") as string;
+      if (!date)
+        return <div className="text-muted-foreground text-xs">Never</div>;
+
+      const formatted = new Date(date).toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+      return <div className="text-muted-foreground text-xs">{formatted}</div>;
+    },
   },
   {
     id: "actions",

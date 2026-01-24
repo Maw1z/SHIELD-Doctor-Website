@@ -45,7 +45,6 @@ export function CustomPatientTable({
   useEffect(() => {
     const auth = getAuth();
 
-    // Use onAuthStateChanged to ensure the user is loaded before fetching
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         fetchPatients(user.uid);
@@ -61,7 +60,6 @@ export function CustomPatientTable({
 
         const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
 
-        // 1. Update the generic type to match your JSON structure
         const response = await axios.get<ApiResponse>(
           `${baseUrl}/v1/patient-doctor`,
           {
@@ -69,7 +67,6 @@ export function CustomPatientTable({
           },
         );
 
-        // 2. Access the nested patients array
         setData(response.data.patients);
         setError(null);
       } catch (err) {
@@ -102,7 +99,7 @@ export function CustomPatientTable({
         onChange={(e) =>
           table.getColumn("name")?.setFilterValue(e.target.value)
         }
-        className="max-w-sm shrink-0"
+        className="w-full shrink-0"
       />
       <div className="rounded-md border overflow-y-auto flex-1">
         <Table>
