@@ -306,10 +306,13 @@ def get_patients_for_doctor():
                 p.height,
                 p.weight,
                 p.gender,
-                p.phone_number
+                p.phone_number,
+                r.risk_score,
+                a.patient_last_checked
             FROM patients p
-            JOIN doctor_assigned d
-                ON p.uuid = d.patient_id
+            JOIN doctor_assigned d ON p.uuid = d.patient_id
+            JOIN risk_assessments r ON p.uuid = r.patient_id
+            JOIN appointments a ON p.uuid = a.patient_id
             WHERE d.doctor_id = %s
         """, (doctor_uuid,))
 
@@ -342,11 +345,14 @@ def get_patients_for_doctor():
                 "height": p[3],
                 "weight": p[4],
                 "gender": p[5],
-                "phone_number": p[6]
+                "phone_number": p[6],
+                "risk_score": p[7],
+                "patient_last_checked": p[8].isoformat() if p[8] else None
             }
             for p in patients
         ]
     }), 200
+
 
 # Create Error Handlers
 @app.errorhandler(400)
