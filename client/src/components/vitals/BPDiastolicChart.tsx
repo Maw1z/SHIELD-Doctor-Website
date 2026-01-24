@@ -14,7 +14,7 @@ import { MOCK_VITALS_DATA } from "@/constants/vitalsData";
 type TimeRange = "1H" | "6H" | "12H" | "24H" | "7D" | "4W" | "6M" | "1Y";
 
 const chartConfig = {
-  bp_diastolic: { label: "Diastolic", color: "hsl(280, 100%, 50%)" },
+  bp_diastolic: { label: "Diastolic", color: "hsl(142, 76%, 36%)" },
 } satisfies ChartConfig;
 
 export function BPDiastolicChart() {
@@ -74,7 +74,7 @@ export function BPDiastolicChart() {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ArrowDown className="h-8 w-8 text-purple-600" />
+            <ArrowDown className="h-8 w-8 text-green-600" />
             <CardTitle className="text-lg font-semibold">
               BP Diastolic
             </CardTitle>
@@ -95,13 +95,13 @@ export function BPDiastolicChart() {
             <button
               key={r}
               onClick={() => setTimeRange(r)}
-              className={`px-2 py-1 text-[9px] font-bold rounded shrink-0 transition-all ${timeRange === r ? "bg-purple-600 text-white shadow-sm" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
+              className={`px-2 py-1 text-[9px] font-bold rounded shrink-0 transition-all ${timeRange === r ? "bg-green-600 text-white shadow-sm" : "bg-slate-100 text-slate-500 hover:bg-slate-200"}`}
             >
               {r}
             </button>
           ))}
         </div>
-        <ChartContainer config={chartConfig} className="h-[120px] w-full">
+        <ChartContainer config={chartConfig} className="h-30 w-full">
           <LineChart data={chartData}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis

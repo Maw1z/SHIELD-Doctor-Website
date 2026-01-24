@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { dashboardColumns } from "./columns";
+import { dashboardColumns } from "./patientColumns";
 import { MOCK_PATIENTS, type Patient } from "@/constants/patients";
 
 interface CustomPatientTableProps {

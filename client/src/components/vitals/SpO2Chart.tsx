@@ -93,7 +93,7 @@ export function SpO2Chart() {
             </button>
           ))}
         </div>
-        <ChartContainer config={chartConfig} className="h-[120px] w-full">
+        <ChartContainer config={chartConfig} className="h-30 w-full">
           <LineChart data={chartData}>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis

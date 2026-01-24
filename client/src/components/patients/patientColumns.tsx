@@ -99,10 +99,10 @@ export const allColumns: ColumnDef<Patient>[] = [
 ];
 
 export const dashboardColumns: ColumnDef<Patient>[] = [
-  allColumns[0], // name
-  allColumns[7], // status
-  allColumns[8], // lastCheck
-  allColumns[9], // actions
+  allColumns[0], // "name"
+  allColumns[4], // "status"
+  allColumns[5], // "lastCheck"
+  allColumns[6], // "actions"
 ];
 
 export const columns = dashboardColumns;
