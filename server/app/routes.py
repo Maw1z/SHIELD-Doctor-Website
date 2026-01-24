@@ -202,6 +202,9 @@ def get_latest_vitals():
 def create_patient():
     data = request.get_json()
 
+    if not data:
+        return jsonify({"error": "Invalid or missing JSON body"}), 400
+
     patient_uuid = data.get('uuid')
     if not patient_uuid:
         return jsonify({"error": "uuid is required"}), 400
@@ -225,7 +228,7 @@ def create_patient():
         cur.execute("""
             INSERT INTO patients
             (uuid, name, height, weight, dob, phone_number, email, gender)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s::uuid, %s, %s, %s, %s, %s, %s, %s)
         """, (
             patient_uuid, name, height, weight, dob, phone, email, gender
         ))
