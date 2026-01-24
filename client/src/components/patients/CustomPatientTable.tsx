@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import {
   flexRender,
   getCoreRowModel,
@@ -19,7 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { dashboardColumns } from "./patientColumns";
-import { MOCK_PATIENTS, type Patient } from "@/constants/patients";
+import { type Patient } from "@/constants/patients";
 
 interface CustomPatientTableProps {
   columns?: ColumnDef<Patient>[];
@@ -28,11 +30,54 @@ interface CustomPatientTableProps {
 export function CustomPatientTable({
   columns = dashboardColumns,
 }: CustomPatientTableProps) {
+  const [data, setData] = useState<Patient[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
+  useEffect(() => {
+    const auth = getAuth();
+
+    // Use onAuthStateChanged to ensure the user is loaded before fetching
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchPatients(user.uid);
+      } else {
+        setIsLoading(false);
+        setError("No authenticated user found.");
+      }
+    });
+
+    const fetchPatients = async (doctorUuid: string) => {
+      try {
+        setIsLoading(true);
+
+        const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
+
+        const response = await axios.get<Patient[]>(
+          `${baseUrl}/v1/patient-doctor`,
+          {
+            params: { doctor_uuid: "loqRHSKxgyWXMYTirfDGsOk4s3f2" },
+          },
+        );
+
+        setData(response.data);
+        setError(null);
+      } catch (err) {
+        console.error("Axios error:", err);
+        setError("Failed to load patient data.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    return () => unsubscribe();
+  }, []);
+
   const table = useReactTable({
-    data: MOCK_PATIENTS,
+    data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -69,7 +114,25 @@ export function CustomPatientTable({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
+                  Loading...
+                </TableCell>
+              </TableRow>
+            ) : error ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center text-red-500"
+                >
+                  {error}
+                </TableCell>
+              </TableRow>
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (

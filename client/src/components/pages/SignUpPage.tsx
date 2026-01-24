@@ -1,7 +1,8 @@
 import { useState, type ChangeEvent, type FormEvent } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/firebase/firebaseConfig";
 import { useNavigate, Link } from "react-router-dom";
+
+import { auth } from "@/firebase/firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
@@ -66,6 +67,11 @@ export default function SignUpPage() {
       return;
     }
 
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      formData.email,
+      formData.password,
+    );
     // TODO: Add details to db
   };
 

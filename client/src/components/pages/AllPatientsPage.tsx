@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Header from "../Header";
 import GradientWrapper from "@/components/GradientWrapper";
 import { CustomPatientTable } from "@/components/patients/CustomPatientTable";
-import { allColumns } from "@/components/patients/columns";
+import { allColumns } from "@/components/patients/patientColumns";
 
 export default function AllPatientsPage() {
   return (
