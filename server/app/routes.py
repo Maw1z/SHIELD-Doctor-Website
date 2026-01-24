@@ -310,7 +310,7 @@ def get_patients_for_doctor():
             FROM patients p
             JOIN doctor_assigned d
                 ON p.uuid = d.patient_uuid
-            WHERE d.doctor_uuid = %s
+            WHERE d.doctor_id = %s
         """, (doctor_uuid,))
 
         patients = cur.fetchall()
