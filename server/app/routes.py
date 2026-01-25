@@ -3,6 +3,7 @@ from flask import json, jsonify, request
 from app.db import get_db_connection
 from psycopg2.extras import RealDictCursor
 import logging
+import decimal
 
 @app.route('/')
 def home():
