@@ -11,6 +11,95 @@ def home():
         "message": "Welcome to the SHIELD Doctor API!"
         }), 200
 
+# --- PATIENTS ---
+
+# Create POST patient api endpoint
+@app.route('/api/v1/patient', methods=['POST'])
+def create_patient():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({"error": "Invalid or missing JSON body"}), 400
+
+    patient_uuid = data.get('uuid')
+    if not patient_uuid:
+        return jsonify({"error": "uuid is required"}), 400
+
+    name = data.get('name')
+    dob = data.get('dob')
+
+    if not name or not dob:
+        return jsonify({"error": "name and dob are required"}), 400
+
+    height = data.get('height')
+    weight = data.get('weight')
+    phone = data.get('phone_number')
+    email = data.get('email')
+    gender = data.get('gender')
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    try:
+        cur.execute("""
+            INSERT INTO patients
+            (uuid, name, height, weight, dob, phone_number, email, gender)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            patient_uuid, name, height, weight, dob, phone, email, gender
+        ))
+
+        conn.commit()
+
+        return jsonify({
+            "status": "success",
+            "patient_uuid": patient_uuid
+        }), 201
+
+    except Exception:
+        conn.rollback()
+        return jsonify({"error": "Internal server error"}), 500
+
+    finally:
+        cur.close()
+        conn.close()
+
+# Create GET patient details based on UUID endpoint
+@app.route('/api/v1/patient', methods=['GET'])
+def get_patient_by_uuid():
+    patient_uuid = request.args.get('uuid')
+    if not patient_uuid:
+        return jsonify({"error": "uuid is required"}), 400
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT uuid, name, height, weight, dob, phone_number, email, gender
+        FROM patients
+        WHERE uuid = %s
+    """, (patient_uuid,))
+
+    patient = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if not patient:
+        return jsonify({"message": "Patient not found"}), 404
+
+    return jsonify({
+        "uuid": patient[0],
+        "name": patient[1],
+        "height": patient[2],
+        "weight": patient[3],
+        "dob": str(patient[4]),
+        "phone_number": patient[5],
+        "email": patient[6],
+        "gender": patient[7]
+    }), 200
+
+# --- VITALS ---
+
 # Creating POST log vitals route
 @app.route('/api/v1/log_vitals', methods=['POST'])
 def log_vital():
@@ -39,6 +128,71 @@ def log_vital():
     finally:
         if conn: 
             conn.close()
+
+# Create GET vitals-history endpoint
+@app.route('/api/v1/vitals-history', methods=['GET'])
+def get_vitals_history():
+    patient_id = request.args.get('patient_id')
+
+    if not patient_id:
+        return jsonify({"error": "patient_id is required"}), 400
+
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        cur.execute("""
+            SELECT *
+            FROM vitals
+            WHERE patient_id = %s
+            ORDER BY recorded_at DESC
+            LIMIT 50;
+        """, (patient_id,))
+
+        results = cur.fetchall()
+
+        for row in results:
+            row['recorded_at'] = row['recorded_at'].isoformat()
+
+        return jsonify(results), 200
+
+    finally:
+        if conn:
+            conn.close()
+
+# Create GET latest-vitals endpoint
+@app.route('/api/v1/vitals-latest', methods=['GET'])
+def get_latest_vitals():
+    patient_id = request.args.get('patient_id')
+
+    if not patient_id:
+        return jsonify({"error": "patient_id is required"}), 400
+
+    conn = get_db_connection()
+    try:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        cur.execute("""
+            SELECT *
+            FROM vitals
+            WHERE patient_id = %s
+            ORDER BY recorded_at DESC
+            LIMIT 1;
+        """, (patient_id,))
+
+        result = cur.fetchone()
+
+        if result:
+            result['recorded_at'] = result['recorded_at'].isoformat()
+            return jsonify(result), 200
+        else:
+            return jsonify({"error": "No vitals found for the given patient_id"}), 404
+
+    finally:
+        if conn:
+            conn.close()
+
+# --- RISK ASSESSMENT ---
 
 # Creating POST risk scores route
 @app.route('/api/v1/risk-scores', methods=['POST'])
@@ -134,154 +288,53 @@ def get_latest_risk():
         if conn:
             conn.close()
 
-# Create GET vitals-history endpoint
-@app.route('/api/v1/vitals-history', methods=['GET'])
-def get_vitals_history():
-    patient_id = request.args.get('patient_id')
+# --- DOCTORS ---
 
-    if not patient_id:
-        return jsonify({"error": "patient_id is required"}), 400
-
-    conn = get_db_connection()
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-
-        cur.execute("""
-            SELECT *
-            FROM vitals
-            WHERE patient_id = %s
-            ORDER BY recorded_at DESC
-            LIMIT 50;
-        """, (patient_id,))
-
-        results = cur.fetchall()
-
-        for row in results:
-            row['recorded_at'] = row['recorded_at'].isoformat()
-
-        return jsonify(results), 200
-
-    finally:
-        if conn:
-            conn.close()
-
-# Create GET latest-vitals endpoint
-@app.route('/api/v1/vitals-latest', methods=['GET'])
-def get_latest_vitals():
-    patient_id = request.args.get('patient_id')
-
-    if not patient_id:
-        return jsonify({"error": "patient_id is required"}), 400
-
-    conn = get_db_connection()
-    try:
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-
-        cur.execute("""
-            SELECT *
-            FROM vitals
-            WHERE patient_id = %s
-            ORDER BY recorded_at DESC
-            LIMIT 1;
-        """, (patient_id,))
-
-        result = cur.fetchone()
-
-        if result:
-            result['recorded_at'] = result['recorded_at'].isoformat()
-            return jsonify(result), 200
-        else:
-            return jsonify({"error": "No vitals found for the given patient_id"}), 404
-
-    finally:
-        if conn:
-            conn.close()
-
-# Create POST patient api endpoint
-@app.route('/api/v1/patient', methods=['POST'])
-def create_patient():
+# Create POST doctor api endpoint
+@app.route('/api/v1/doctor', methods=['POST'])
+def create_doctor():
     data = request.get_json()
 
     if not data:
         return jsonify({"error": "Invalid or missing JSON body"}), 400
 
-    patient_uuid = data.get('uuid')
-    if not patient_uuid:
-        return jsonify({"error": "uuid is required"}), 400
-
+    doctor_id = data.get('doctor_id')
     name = data.get('name')
-    dob = data.get('dob')
 
-    if not name or not dob:
-        return jsonify({"error": "name and dob are required"}), 400
+    if not doctor_id or not name:
+        return jsonify({"error": "doctor_id and name are required"}), 400
 
-    height = data.get('height')
-    weight = data.get('weight')
-    phone = data.get('phone_number')
+    specialization = data.get('specialization')
+    phone_number = data.get('phone_number')
     email = data.get('email')
-    gender = data.get('gender')
 
     conn = get_db_connection()
     cur = conn.cursor()
 
     try:
         cur.execute("""
-            INSERT INTO patients
-            (uuid, name, height, weight, dob, phone_number, email, gender)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO doctors
+            (doctor_id, name, specialization, phone_number, email)
+            VALUES (%s, %s, %s, %s, %s)
         """, (
-            patient_uuid, name, height, weight, dob, phone, email, gender
+            doctor_id, name, specialization, phone_number, email
         ))
 
         conn.commit()
 
         return jsonify({
             "status": "success",
-            "patient_uuid": patient_uuid
+            "doctor_id": doctor_id
         }), 201
 
-    except Exception:
+    except Exception as e:
         conn.rollback()
+        logging.error(f"Error creating doctor: {e}")
         return jsonify({"error": "Internal server error"}), 500
 
     finally:
         cur.close()
         conn.close()
-
-# Create GET patient details based on UUID endpoint
-@app.route('/api/v1/patient', methods=['GET'])
-def get_patient_by_uuid():
-    patient_uuid = request.args.get('uuid')
-    if not patient_uuid:
-        return jsonify({"error": "uuid is required"}), 400
-
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    cur.execute("""
-        SELECT uuid, name, height, weight, dob, phone_number, email, gender
-        FROM patients
-        WHERE uuid = %s
-    """, (patient_uuid,))
-
-    patient = cur.fetchone()
-    cur.close()
-    conn.close()
-
-    if not patient:
-        return jsonify({"message": "Patient not found"}), 404
-
-    return jsonify({
-        "uuid": patient[0],
-        "name": patient[1],
-        "height": patient[2],
-        "weight": patient[3],
-        "dob": str(patient[4]),
-        "phone_number": patient[5],
-        "email": patient[6],
-        "gender": patient[7]
-    }), 200
-
 
 # Create GET patients assigned to doctor endpoint
 @app.route('/api/v1/patient-doctor', methods=['GET'])
@@ -353,6 +406,7 @@ def get_patients_for_doctor():
         ]
     }), 200
 
+# --- ERROR HANDLERS ---
 
 # Create Error Handlers
 @app.errorhandler(400)
@@ -394,4 +448,3 @@ def internal_server_error(error):
         "error": "Internal Server Error",
         "message": "Something went wrong on the server"
     }), 500
-
