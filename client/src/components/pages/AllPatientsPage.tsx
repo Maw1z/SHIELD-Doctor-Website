@@ -3,8 +3,11 @@ import Header from "../Header";
 import GradientWrapper from "@/components/GradientWrapper";
 import { CustomPatientTable } from "@/components/patients/CustomPatientTable";
 import { allColumns } from "@/components/patients/patientColumns";
+import { usePatients } from "@/hooks/usePatients";
 
 export default function AllPatientsPage() {
+  const { data, isLoading, error } = usePatients();
+
   return (
     <>
       <GradientWrapper />
@@ -16,7 +19,12 @@ export default function AllPatientsPage() {
               <CardTitle className="text-3xl">All Patients</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 min-h-0 overflow-hidden pb-2">
-              <CustomPatientTable columns={allColumns} />
+              <CustomPatientTable
+                columns={allColumns}
+                data={data}
+                isLoading={isLoading}
+                error={error}
+              />
             </CardContent>
           </Card>
         </div>

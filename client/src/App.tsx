@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 
 import LoginPage from "@/components/pages/LoginPage";
 import SignUpPage from "@/components/pages/SignUpPage";
@@ -9,8 +9,12 @@ import AppointmentsPage from "./components/pages/AppointmentsPage";
 import PatientDetailsPage from "@/components/pages/PatientDetailsPage";
 import NotFoundPage from "@/components/pages/NotFoundPage";
 
+import { Toaster } from "@/components/ui/sonner";
+
 import { type User, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig";
+import { LoaderCircle } from "lucide-react";
+import GradientWrapper from "./components/GradientWrapper";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -28,6 +32,8 @@ function App() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
+        <GradientWrapper />
+        <LoaderCircle className="mr-2 h-6 w-6 animate-spin" />
         <p className="animate-pulse text-muted-foreground">Loading...</p>
       </div>
     );
@@ -63,6 +69,7 @@ function App() {
         <Route path="/" element={<Navigate to="/home" />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
+      <Toaster position="bottom-right" richColors />
     </BrowserRouter>
   );
 }

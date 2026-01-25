@@ -1,7 +1,10 @@
 import { useState, FormEvent } from "react";
+import { useNavigate, Link } from "react-router-dom";
+
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig";
-import { useNavigate, Link } from "react-router-dom";
+import { getFriendlyAuthError } from "@/lib/auth-errors";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { toast } from "sonner";
 import GradientWrapper from "../GradientWrapper";
 
 export default function LoginPage() {
@@ -29,8 +33,13 @@ export default function LoginPage() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigate("/home");
+
+      toast.success("Logged in successfully!", {
+        description: "Welcome back to SHIELD.",
+      });
     } catch (err: any) {
-      setError(err.message || "Failed to login");
+      const friendlyMessage = getFriendlyAuthError(err.code);
+      setError(friendlyMessage);
     } finally {
       setLoading(false);
     }

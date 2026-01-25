@@ -3,6 +3,9 @@ import { useNavigate, Link } from "react-router-dom";
 
 import { auth } from "@/firebase/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { deleteUser } from "firebase/auth";
+import { getFriendlyAuthError } from "@/lib/auth-errors";
+import axios from "axios";
 
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
@@ -25,6 +28,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { toast } from "sonner";
+
 import GradientWrapper from "../GradientWrapper";
 
 const SPECIALIZATIONS = [
@@ -62,19 +67,62 @@ export default function SignUpPage() {
 
   const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
+    setError("");
+
     if (!formData.specialization) {
       setError("Please select a specialization");
       return;
     }
 
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      formData.email,
-      formData.password,
-    );
-    // TODO: Add details to db
-  };
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
 
+    setLoading(true);
+    let user = null;
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password,
+      );
+      user = userCredential.user;
+
+      const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
+
+      const response = await axios.post(`${baseUrl}/v1/doctor`, {
+        doctor_id: user.uid,
+        name: formData.name,
+        specialization: formData.specialization,
+        phone_number: phone,
+        email: formData.email,
+      });
+
+      if (response.status === 201) {
+        toast.success("Account created successfully!", {
+          description: "Welcome to SHIELD.",
+        });
+
+        setTimeout(() => {
+          navigate("/home");
+        }, 2000);
+      }
+    } catch (err: any) {
+      if (user) {
+        await deleteUser(user);
+      }
+
+      const friendlyMessage = err.code
+        ? getFriendlyAuthError(err.code)
+        : err.response?.data?.error || "An error occurred";
+
+      setError(friendlyMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <>
       <GradientWrapper />

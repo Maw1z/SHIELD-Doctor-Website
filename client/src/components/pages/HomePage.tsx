@@ -6,7 +6,11 @@ import { CustomPatientTable } from "@/components/patients/CustomPatientTable";
 import { StatCard } from "@/components/StatCard";
 import { AppointmentTable } from "../appointments/AppointmentTable";
 
+import { usePatients } from "@/hooks/usePatients";
+
 export default function HomePage() {
+  const { data, isLoading, error } = usePatients();
+
   return (
     <>
       <GradientWrapper />
@@ -22,7 +26,10 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-4">
-                    <StatCard title="Patients" value={24} />
+                    <StatCard
+                      title="Patients"
+                      value={isLoading ? "..." : data.length}
+                    />
                     <StatCard title="Alerts" value={2} />
                   </div>
                 </CardContent>
@@ -34,7 +41,11 @@ export default function HomePage() {
                   <CardTitle className="text-3xl">Patient Lists</CardTitle>
                 </CardHeader>
                 <CardContent className="flex-1 min-h-0 overflow-hidden pb-2">
-                  <CustomPatientTable />
+                  <CustomPatientTable
+                    data={data}
+                    isLoading={isLoading}
+                    error={error}
+                  />
                 </CardContent>
               </Card>
             </div>
