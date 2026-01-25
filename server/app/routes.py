@@ -148,8 +148,9 @@ def get_vitals_history():
     }
     history_interval = range_map.get(time_range, "7 days")
 
-    conn = get_db_connection()
+    conn = None
     try:
+        conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
 
         if is_long_term:
@@ -187,13 +188,20 @@ def get_vitals_history():
 
         formatted_vitals = []
         for row in results:
+            # Helper to convert Decimal/None to safe JSON values
+            def clean_val(val, is_int=True):
+                if val is None: return 0
+                if isinstance(val, decimal.Decimal):
+                    return int(val) if is_int else float(val)
+                return val
+            
             formatted_vitals.append({
-                'recorded_at': row['time_label'].isoformat(),
-                'heart_rate': row['heart_rate'],
-                'hrv': row['hrv'],
-                'spo2': float(row['spo2']) if row['spo2'] else None,
-                'bp_systolic': row['bp_systolic'],
-                'bp_diastolic': row['bp_diastolic']
+                'recorded_at': row['time_label'].isoformat() if row['time_label'] else None,
+                'heart_rate': clean_val(row['heart_rate']),
+                'hrv': clean_val(row['hrv']),
+                'spo2': clean_val(row['spo2'], is_int=False),
+                'bp_systolic': clean_val(row['bp_systolic']),
+                'bp_diastolic': clean_val(row['bp_diastolic'])
             })
 
         return jsonify(formatted_vitals), 200
