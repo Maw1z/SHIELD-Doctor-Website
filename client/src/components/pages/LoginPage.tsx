@@ -44,12 +44,18 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
   return (
     <>
       <GradientWrapper />
-      <div className="flex min-h-screen items-center justify-center p-4 font-poppins">
-        <Card className="w-full max-w-md ">
+      <div className="min-h-screen font-poppins flex flex-col items-center justify-center px-4">
+        <div className="mb-2">
+          <img
+            src="/images/ShieldHorizontal.svg"
+            alt="Shield Logo"
+            className="h-20 w-auto"
+          />
+        </div>
+        <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Doctor Login</CardTitle>
             <CardDescription>
@@ -80,12 +86,12 @@ export default function LoginPage() {
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full " disabled={loading}>
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Logging in..." : "Login"}
               </Button>
               <p className="text-center text-sm">
-                Don't have an account?{" "}
-                <Link to="/signup" className=" hover:underline">
+                Don&apos;t have an account?{" "}
+                <Link to="/signup" className="hover:underline">
                   Sign up
                 </Link>
               </p>

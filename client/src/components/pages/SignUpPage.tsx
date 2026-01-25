@@ -126,7 +126,14 @@ export default function SignUpPage() {
   return (
     <>
       <GradientWrapper />
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="min-h-screen font-poppins flex flex-col items-center justify-center px-4">
+        <div className="mb-2">
+          <img
+            src="/images/ShieldHorizontal.svg"
+            alt="Shield Logo"
+            className="h-20 w-auto"
+          />
+        </div>
         <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Doctor Sign Up</CardTitle>
