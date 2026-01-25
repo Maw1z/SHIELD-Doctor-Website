@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -8,65 +8,50 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { Heart } from "lucide-react";
-import { MOCK_VITALS_DATA } from "@/constants/vitalsData";
-
-type TimeRange = "1H" | "6H" | "12H" | "24H" | "7D" | "4W" | "6M" | "1Y";
 
 const chartConfig = {
   heart_rate: { label: "Heart Rate", color: "hsl(0, 84%, 60%)" },
 } satisfies ChartConfig;
 
-export function HeartRateChart() {
-  const [timeRange, setTimeRange] = useState<TimeRange>("1H");
+interface ChartProps {
+  vitals: any[];
+  timeRange: string;
+  onRangeChange: (range: any) => void;
+}
 
+export function HeartRateChart({
+  vitals,
+  timeRange,
+  onRangeChange,
+}: ChartProps) {
   const { chartData, average } = useMemo(() => {
+    if (!vitals || !Array.isArray(vitals)) {
+      return { chartData: [], average: 0 };
+    }
+
     const now = new Date();
-    let msBack = 0;
+    const msMap: Record<string, number> = {
+      "1H": 3600000,
+      "6H": 21600000,
+      "12H": 43200000,
+      "24H": 86400000,
+      "7D": 604800000,
+    };
 
-    switch (timeRange) {
-      case "1H":
-        msBack = 3600000;
-        break;
-      case "6H":
-        msBack = 21600000;
-        break;
-      case "12H":
-        msBack = 43200000;
-        break;
-      case "24H":
-        msBack = 86400000;
-        break;
-      case "7D":
-        msBack = 604800000;
-        break;
-      case "4W":
-        msBack = 2419200000;
-        break;
-      case "6M":
-        msBack = 15778800000;
-        break;
-      case "1Y":
-        msBack = 31536000000;
-        break;
+    let filtered = vitals;
+    if (msMap[timeRange]) {
+      const cutoff = now.getTime() - msMap[timeRange];
+      filtered = vitals.filter(
+        (v) => new Date(v.recorded_at).getTime() >= cutoff,
+      );
     }
 
-    const cutoff = new Date(now.getTime() - msBack);
-    const filtered = MOCK_VITALS_DATA.filter(
-      (d) => new Date(d.recorded_at) >= cutoff,
-    );
-
-    // Dynamic aggregation to keep 60-100 points on the chart regardless of range
-    let aggregated = filtered;
-    const maxPoints = 60;
-    if (filtered.length > maxPoints) {
-      const step = Math.ceil(filtered.length / maxPoints);
-      aggregated = filtered.filter((_, i) => i % step === 0);
-    }
-
-    const avg =
-      filtered.length > 0
-        ? filtered.reduce((sum, d) => sum + d.heart_rate, 0) / filtered.length
-        : 0;
+    const step = Math.ceil(filtered.length / 100);
+    const aggregated = filtered.filter((_, i) => i % (step || 1) === 0);
+    const avg = filtered.length
+      ? filtered.reduce((sum, d) => sum + (d.heart_rate || 0), 0) /
+        filtered.length
+      : 0;
 
     return {
       chartData: aggregated.map((d) => ({
@@ -75,7 +60,7 @@ export function HeartRateChart() {
       })),
       average: Math.round(avg),
     };
-  }, [timeRange]);
+  }, [vitals, timeRange]);
 
   return (
     <Card className="shadow-sm">
@@ -94,25 +79,21 @@ export function HeartRateChart() {
         </div>
       </CardHeader>
       <CardContent className="pb-4">
-        {/* Scrollable container for many range buttons */}
         <div className="flex gap-1 mb-4 overflow-x-auto pb-1 no-scrollbar">
-          {(
-            ["1H", "6H", "12H", "24H", "7D", "4W", "6M", "1Y"] as TimeRange[]
-          ).map((range) => (
+          {["1H", "6H", "12H", "24H", "7D", "4W", "6M", "1Y"].map((r) => (
             <button
-              key={range}
-              onClick={() => setTimeRange(range)}
+              key={r}
+              onClick={() => onRangeChange(r)}
               className={`px-2 py-1 text-[9px] font-bold rounded shrink-0 transition-all ${
-                timeRange === range
+                timeRange === r
                   ? "bg-red-500 text-white shadow-sm"
                   : "bg-slate-100 text-slate-500 hover:bg-slate-200"
               }`}
             >
-              {range}
+              {r}
             </button>
           ))}
         </div>
-
         <ChartContainer config={chartConfig} className="h-30 w-full">
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -124,27 +105,31 @@ export function HeartRateChart() {
               minTickGap={15}
               tickFormatter={(value) => {
                 const date = new Date(value);
-                // Show minutes for 1H, hours for others
-                return timeRange === "1H"
-                  ? date.toLocaleTimeString([], {
-                      minute: "2-digit",
-                      second: "2-digit",
-                    })
-                  : date.toLocaleTimeString([], { hour: "numeric" });
+
+                if (["1H", "6H", "12H", "24H"].includes(timeRange)) {
+                  return date.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                }
+                return date.toLocaleDateString([], {
+                  month: "short",
+                  day: "numeric",
+                });
               }}
             />
             <YAxis domain={["dataMin - 5", "dataMax + 5"]} hide />
             <ChartTooltip
               content={
                 <ChartTooltipContent
-                  labelFormatter={(value) =>
-                    new Date(value).toLocaleTimeString([], {
+                  labelFormatter={(value) => {
+                    return new Date(value).toLocaleString([], {
                       month: "short",
                       day: "numeric",
                       hour: "2-digit",
                       minute: "2-digit",
-                    })
-                  }
+                    });
+                  }}
                 />
               }
             />
@@ -153,8 +138,7 @@ export function HeartRateChart() {
               type="monotone"
               stroke="var(--color-heart_rate)"
               strokeWidth={2}
-              dot={timeRange === "1H"} // Only show dots on high-granularity 1H view
-              activeDot={{ r: 4 }}
+              dot={false}
             />
           </LineChart>
         </ChartContainer>
