@@ -79,7 +79,7 @@ export function AppointmentDialog({
       combinedDateTime.setHours(parseInt(hours), parseInt(minutes));
 
       const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
-      await axios.post(`${baseUrl}/v1/appointments`, {
+      await axios.post(`${baseUrl}/appointments`, {
         doctor_id: doctorId,
         patient_id: formData.patient_id,
         title: formData.title,

@@ -16,7 +16,7 @@ export function useAppointments() {
     setAppointmentsError(null);
     try {
       const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
-      const res = await axios.get(`${baseUrl}/v1/appointments`, {
+      const res = await axios.get(`${baseUrl}/appointments`, {
         params: { doctor_id: doctorUuid },
       });
       setAppointmentsData(res.data);

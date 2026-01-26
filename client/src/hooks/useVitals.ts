@@ -25,7 +25,7 @@ export function useVitals(patientId: string, selectedRange: string) {
 
       const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
       const res = await fetch(
-        `${baseUrl}/v1/vitals-history?patient_id=${patientId}&range=${apiRange}`,
+        `${baseUrl}/vitals-history?patient_id=${patientId}&range=${apiRange}`,
       );
       const json = await res.json();
       setData(json);

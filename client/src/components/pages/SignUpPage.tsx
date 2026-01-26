@@ -92,7 +92,7 @@ export default function SignUpPage() {
 
       const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
 
-      const response = await axios.post(`${baseUrl}/v1/doctor`, {
+      const response = await axios.post(`${baseUrl}/doctor`, {
         doctor_id: user.uid,
         name: formData.name,
         specialization: formData.specialization,

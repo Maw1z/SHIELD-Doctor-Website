@@ -29,7 +29,7 @@ export function usePatients() {
         setIsPatientsLoading(true);
         const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
         const response = await axios.get<ApiResponse>(
-          `${baseUrl}/v1/patient-doctor`,
+          `${baseUrl}/patient-doctor`,
           { params: { doctor_uuid: doctorUuid } },
         );
         setPatientsData(response.data.patients);

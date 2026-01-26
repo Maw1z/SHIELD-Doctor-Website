@@ -43,7 +43,7 @@ export default function PatientDetailsPage() {
         setIsLoading(true);
         const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
 
-        const response = await axios.get<Patient>(`${baseUrl}/v1/patient`, {
+        const response = await axios.get<Patient>(`${baseUrl}/patient`, {
           params: { uuid: id },
         });
 
