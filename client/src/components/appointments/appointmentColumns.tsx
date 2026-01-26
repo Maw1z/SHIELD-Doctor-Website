@@ -1,62 +1,38 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useNavigate } from "react-router-dom";
+import { ArrowUpDown } from "lucide-react";
 
 export interface Appointment {
   appointment_id: number;
+  patient_name: string;
   doctor_id: string;
   patient_id: string;
   title: string;
   appointment_datetime: string;
   patient_last_checked: string | null;
   created_at: string;
-  updated_at: string;
 }
 
 export const allAppointmentColumns: ColumnDef<Appointment>[] = [
-  {
-    accessorKey: "appointment_id",
-    header: "ID",
-    cell: ({ row }) => (
-      <div className="text-sm">{row.getValue("appointment_id")}</div>
-    ),
-  },
   {
     accessorKey: "title",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="pl-0 hover:bg-transparent font-bold"
+        className="pl-0 hover:bg-transparent"
       >
         Title
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="font-medium text-sm">{row.getValue("title")}</div>
-    ),
+    cell: ({ row }) => <div className="text-sm">{row.getValue("title")}</div>,
   },
   {
-    accessorKey: "patient_id",
-    header: "Patient ID",
+    accessorKey: "patient_name",
+    header: "Patient Name",
     cell: ({ row }) => (
-      <div className="text-sm">{row.getValue("patient_id")}</div>
-    ),
-  },
-  {
-    accessorKey: "doctor_id",
-    header: "Doctor ID",
-    cell: ({ row }) => (
-      <div className="text-sm">{row.getValue("doctor_id")}</div>
+      <div className="text-sm">{row.getValue("patient_name")}</div>
     ),
   },
   {
@@ -65,7 +41,7 @@ export const allAppointmentColumns: ColumnDef<Appointment>[] = [
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="pl-0 hover:bg-transparent font-bold"
+        className="pl-0 hover:bg-transparent"
       >
         Date & Time
         <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -100,67 +76,12 @@ export const allAppointmentColumns: ColumnDef<Appointment>[] = [
       return <div className="text-muted-foreground text-xs">{formatted}</div>;
     },
   },
-  {
-    accessorKey: "created_at",
-    header: "Created",
-    cell: ({ row }) => {
-      const date = row.getValue("created_at") as string;
-      const formatted = new Date(date).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-      return <div className="text-xs text-muted-foreground">{formatted}</div>;
-    },
-  },
-  {
-    accessorKey: "updated_at",
-    header: "Updated",
-    cell: ({ row }) => {
-      const date = row.getValue("updated_at") as string;
-      const formatted = new Date(date).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-      return <div className="text-xs text-muted-foreground">{formatted}</div>;
-    },
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const appointment = row.original;
-      const navigate = useNavigate();
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() =>
-                navigate(`/appointments/${appointment.appointment_id}`)
-              }
-              className="cursor-pointer"
-            >
-              View Details
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer">Edit</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
 ];
 
 export const dashboardAppointmentColumns: ColumnDef<Appointment>[] = [
-  allAppointmentColumns[1], // title
-  allAppointmentColumns[2], // patient_id
-  allAppointmentColumns[4], // appointment_datetime
+  allAppointmentColumns[0], // title
+  allAppointmentColumns[1], // patient name
+  allAppointmentColumns[2], // appoint date time
 ];
 
 export const appointmentColumns = dashboardAppointmentColumns;

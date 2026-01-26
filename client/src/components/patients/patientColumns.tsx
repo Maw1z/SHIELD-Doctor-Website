@@ -21,16 +21,8 @@ const statusColors = {
 export const allColumns: ColumnDef<Patient>[] = [
   {
     accessorKey: "name",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="pl-0 hover:bg-transparent font-bold"
-      >
-        Patient Name
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: "Patient Name",
+    cell: ({ row }) => <div className="text-sm">{row.getValue("name")}</div>,
   },
   {
     accessorKey: "dob",

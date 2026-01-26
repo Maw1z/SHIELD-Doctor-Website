@@ -6,7 +6,7 @@ import { allColumns } from "@/components/patients/patientColumns";
 import { usePatients } from "@/hooks/usePatients";
 
 export default function AllPatientsPage() {
-  const { data, isLoading, error } = usePatients();
+  const { patientsData, isPatientsLoading, patientsError } = usePatients();
 
   return (
     <>
@@ -21,9 +21,9 @@ export default function AllPatientsPage() {
             <CardContent className="flex-1 min-h-0 overflow-hidden pb-2">
               <CustomPatientTable
                 columns={allColumns}
-                data={data}
-                isLoading={isLoading}
-                error={error}
+                data={patientsData}
+                isLoading={isPatientsLoading}
+                error={patientsError}
               />
             </CardContent>
           </Card>

@@ -1,7 +1,10 @@
+import { useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
+  getSortedRowModel,
   useReactTable,
+  type SortingState,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -11,28 +14,51 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { appointmentColumns } from "./appointmentColumns";
-import { MOCK_APPOINTMENTS } from "@/constants/appointments";
+import { Loader2 } from "lucide-react";
 
-export function AppointmentTable() {
+interface AppointmentTableProps {
+  columns: any[];
+  data: any[];
+  isLoading?: boolean;
+  maxHeight?: string;
+}
+
+export function AppointmentTable({
+  columns,
+  data,
+  isLoading,
+  maxHeight = "max-h-100",
+}: AppointmentTableProps) {
+  const [sorting, setSorting] = useState<SortingState>([]);
+
   const table = useReactTable({
-    data: MOCK_APPOINTMENTS,
-    columns: appointmentColumns,
+    data,
+    columns,
+    state: { sorting },
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
   });
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-48 border rounded-md">
+        <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+        <p>Fetching Appointments..</p>
+      </div>
+    );
+  }
+
   return (
-    /* The max-h-[240px] ensures it fits ~4 rows before scrolling */
-    <div className="rounded-md border flex-1 overflow-y-auto max-h-30 relative">
+    <div
+      className={`rounded-md border flex-1 overflow-y-auto ${maxHeight} relative`}
+    >
       <Table>
         <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
-                <TableHead
-                  key={header.id}
-                  className="h-10 py-0 text-xs uppercase font-bold"
-                >
+                <TableHead key={header.id} className="h-10 py-0 text-sm">
                   {flexRender(
                     header.column.columnDef.header,
                     header.getContext(),
@@ -43,11 +69,11 @@ export function AppointmentTable() {
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
+          {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="h-12">
+              <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="py-2">
+                  <TableCell key={cell.id} className="py-3 font-light">
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
@@ -55,7 +81,7 @@ export function AppointmentTable() {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={3} className="h-24 text-center text-sm">
+              <TableCell colSpan={columns.length} className="h-24 text-center">
                 No appointments.
               </TableCell>
             </TableRow>

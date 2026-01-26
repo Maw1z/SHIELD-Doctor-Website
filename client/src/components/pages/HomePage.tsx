@@ -7,9 +7,12 @@ import { StatCard } from "@/components/StatCard";
 import { AppointmentTable } from "../appointments/AppointmentTable";
 
 import { usePatients } from "@/hooks/usePatients";
+import { useAppointments } from "@/hooks/useAppointments";
+import { dashboardAppointmentColumns } from "../appointments/appointmentColumns";
 
 export default function HomePage() {
-  const { data, isLoading, error } = usePatients();
+  const { patientsData, isPatientsLoading, patientsError } = usePatients();
+  const { appointmentsData, isAppointmentsLoading } = useAppointments();
 
   return (
     <>
@@ -28,7 +31,7 @@ export default function HomePage() {
                   <div className="grid grid-cols-2 gap-4">
                     <StatCard
                       title="Patients"
-                      value={isLoading ? "..." : data.length}
+                      value={isPatientsLoading ? "..." : patientsData.length}
                     />
                     <StatCard title="Alerts" value={2} />
                   </div>
@@ -42,9 +45,9 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent className="flex-1 min-h-0 overflow-hidden pb-2">
                   <CustomPatientTable
-                    data={data}
-                    isLoading={isLoading}
-                    error={error}
+                    data={patientsData}
+                    isLoading={isPatientsLoading}
+                    error={patientsError}
                   />
                 </CardContent>
               </Card>
@@ -59,7 +62,11 @@ export default function HomePage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pb-2">
-                  <AppointmentTable />
+                  <AppointmentTable
+                    columns={dashboardAppointmentColumns}
+                    data={appointmentsData}
+                    isLoading={isAppointmentsLoading}
+                  />
                 </CardContent>
               </Card>
 

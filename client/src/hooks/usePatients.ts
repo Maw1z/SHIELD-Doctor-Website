@@ -9,9 +9,9 @@ interface ApiResponse {
 }
 
 export function usePatients() {
-  const [data, setData] = useState<Patient[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [patientsData, setPatientsData] = useState<Patient[]>([]);
+  const [isPatientsLoading, setIsPatientsLoading] = useState(true);
+  const [patientsError, setPatientsError] = useState<string | null>(null);
 
   useEffect(() => {
     const auth = getAuth();
@@ -19,30 +19,30 @@ export function usePatients() {
       if (user) {
         fetchPatients(user.uid);
       } else {
-        setIsLoading(false);
-        setError("No authenticated user found.");
+        setIsPatientsLoading(false);
+        setPatientsError("No authenticated user found.");
       }
     });
 
     const fetchPatients = async (doctorUuid: string) => {
       try {
-        setIsLoading(true);
+        setIsPatientsLoading(true);
         const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
         const response = await axios.get<ApiResponse>(
           `${baseUrl}/v1/patient-doctor`,
           { params: { doctor_uuid: doctorUuid } },
         );
-        setData(response.data.patients);
-        setError(null);
+        setPatientsData(response.data.patients);
+        setPatientsError(null);
       } catch (err) {
-        setError("Failed to load patient data.");
+        setPatientsError("Failed to load patient data.");
       } finally {
-        setIsLoading(false);
+        setIsPatientsLoading(false);
       }
     };
 
     return () => unsubscribe();
   }, []);
 
-  return { data, isLoading, error };
+  return { patientsData, isPatientsLoading, patientsError };
 }

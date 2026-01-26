@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { dashboardColumns } from "./patientColumns";
 import { type Patient } from "@/constants/patients";
+import { Loader2 } from "lucide-react";
 
 interface CustomPatientTableProps {
   columns?: ColumnDef<Patient>[];
@@ -48,6 +49,15 @@ export function CustomPatientTable({
     state: { sorting, columnFilters },
   });
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-48 border rounded-md">
+        <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+        <p>Fetching Patients..</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full space-y-4">
       <Input
@@ -75,16 +85,7 @@ export function CustomPatientTable({
             ))}
           </TableHeader>
           <TableBody>
-            {isLoading ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  Loading...
-                </TableCell>
-              </TableRow>
-            ) : error ? (
+            {error ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}

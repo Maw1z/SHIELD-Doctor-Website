@@ -1,6 +1,9 @@
 import { useState } from "react";
 import axios from "axios";
-import { Loader2 } from "lucide-react";
+import { Loader2, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { getAuth } from "firebase/auth";
+
 import {
   Dialog,
   DialogContent,
@@ -9,10 +12,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+import { usePatients } from "@/hooks/usePatients";
 
 interface AppointmentDialogProps {
   open: boolean;
@@ -20,48 +39,61 @@ interface AppointmentDialogProps {
   onSuccess: () => void;
 }
 
-const API_BASE = import.meta.env.VITE_PUBLIC_API_BASE_URL;
-
 export function AppointmentDialog({
   open,
   onOpenChange,
   onSuccess,
 }: AppointmentDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Local Form State
+  const [date, setDate] = useState<Date>();
+  const [time, setTime] = useState("");
   const [formData, setFormData] = useState({
-    doctor_id: "",
     patient_id: "",
     title: "",
-    appointment_datetime: "",
   });
+
+  const auth = getAuth();
+  const { patientsData, isPatientsLoading } = usePatients();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const doctorId = auth.currentUser?.uid;
+    if (!doctorId) {
+      toast.error("Auth Error", { description: "You must be logged in." });
+      return;
+    }
+
+    if (!date || !time || !formData.patient_id) {
+      toast.error("Validation Error", {
+        description: "Please fill in all fields.",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      // POST API Call directly inside the component
-      await axios.post(`${API_BASE}/v1/appointments`, {
-        doctor_id: formData.doctor_id,
+      const [hours, minutes] = time.split(":");
+      const combinedDateTime = new Date(date);
+      combinedDateTime.setHours(parseInt(hours), parseInt(minutes));
+
+      const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
+      await axios.post(`${baseUrl}/v1/appointments`, {
+        doctor_id: doctorId,
         patient_id: formData.patient_id,
         title: formData.title,
-        appointment_datetime: formData.appointment_datetime,
+        appointment_datetime: combinedDateTime.toISOString(),
       });
 
       toast.success("Success", {
         description: "Appointment has been scheduled successfully.",
       });
 
-      // Reset form and close
-      setFormData({
-        doctor_id: "",
-        patient_id: "",
-        title: "",
-        appointment_datetime: "",
-      });
-      onSuccess(); // Triggers the table refresh in the parent page
+      setFormData({ patient_id: "", title: "" });
+      setDate(undefined);
+      setTime("");
+      onSuccess();
       onOpenChange(false);
     } catch (error: any) {
       toast.error("Error", {
@@ -73,22 +105,19 @@ export function AppointmentDialog({
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({ ...prev, [id]: value }));
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-105">
+      <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>New Appointment</DialogTitle>
+            <DialogTitle className="text-xl font-bold">
+              New Appointment
+            </DialogTitle>
             <DialogDescription>
-              Enter the details for the new appointment. Click save when you're
-              done.
+              Select a patient and schedule their visit.
             </DialogDescription>
           </DialogHeader>
+
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="title">Appointment Title</Label>
@@ -96,41 +125,88 @@ export function AppointmentDialog({
                 id="title"
                 placeholder="Routine Checkup"
                 value={formData.title}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 required
               />
             </div>
+
             <div className="grid gap-2">
-              <Label htmlFor="patient_id">Patient UUID / ID</Label>
-              <Input
-                id="patient_id"
-                placeholder="p-12345"
+              <Label htmlFor="patient">Select Patient</Label>
+              <Select
+                onValueChange={(value) =>
+                  setFormData({ ...formData, patient_id: value })
+                }
                 value={formData.patient_id}
-                onChange={handleChange}
-                required
-              />
+              >
+                <SelectTrigger className="w-full" id="patient">
+                  <SelectValue
+                    placeholder={
+                      isPatientsLoading
+                        ? "Loading patients..."
+                        : "Select a patient"
+                    }
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {patientsData.map((patient) => (
+                    <SelectItem key={patient.uuid} value={patient.uuid}>
+                      {patient.name}
+                    </SelectItem>
+                  ))}
+                  {patientsData.length === 0 && !isPatientsLoading && (
+                    <div className="p-2 text-sm text-muted-foreground text-center">
+                      No patients found
+                    </div>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="doctor_id">Doctor UUID / ID</Label>
-              <Input
-                id="doctor_id"
-                placeholder="d-67890"
-                value={formData.doctor_id}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="appointment_datetime">Date & Time</Label>
-              <Input
-                id="appointment_datetime"
-                type="datetime-local"
-                value={formData.appointment_datetime}
-                onChange={handleChange}
-                required
-              />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "justify-start text-left font-normal",
+                        !date && "text-muted-foreground",
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      initialFocus
+                      disabled={(date) =>
+                        date < new Date(new Date().setHours(0, 0, 0, 0))
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="time">Time</Label>
+                <Input
+                  id="time"
+                  type="time"
+                  value={time}
+                  onChange={(e) => setTime(e.target.value)}
+                  required
+                />
+              </div>
             </div>
           </div>
+
           <DialogFooter>
             <Button
               type="button"
@@ -140,7 +216,7 @@ export function AppointmentDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || isPatientsLoading}>
               {isSubmitting && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
