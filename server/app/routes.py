@@ -373,8 +373,7 @@ def get_appointments():
                 title, 
                 appointment_datetime, 
                 patient_last_checked, 
-                created_at, 
-                updated_at 
+                created_at
             FROM appointments 
             WHERE doctor_id = %s
             ORDER BY appointment_datetime ASC
