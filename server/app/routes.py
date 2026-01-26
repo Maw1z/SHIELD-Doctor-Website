@@ -367,16 +367,18 @@ def get_appointments():
         
         query = """
             SELECT 
-                appointment_id, 
-                doctor_id, 
-                patient_id, 
-                title, 
-                appointment_datetime, 
-                patient_last_checked, 
-                created_at
-            FROM appointments 
-            WHERE doctor_id = %s
-            ORDER BY appointment_datetime ASC
+                a.appointment_id, 
+                a.doctor_id, 
+                a.patient_id, 
+                p.name AS patient_name,
+                a.title, 
+                a.appointment_datetime, 
+                a.patient_last_checked, 
+                a.created_at
+            FROM appointments a
+            INNER JOIN patients p ON a.patient_id = p.uuid
+            WHERE a.doctor_id = %s
+            ORDER BY a.appointment_datetime ASC
         """
         
         cur.execute(query, (doctor_id,))
@@ -393,7 +395,7 @@ def get_appointments():
         return jsonify(rows), 200
     except Exception as e:
         print(f"Database error: {e}")
-        return jsonify({"error": "Internal server error"}), 500
+        return jsonify({"error": str(e)}), 500
 
 # Create POST appointments
 @app.route('/api/v1/appointments', methods=['POST'])
