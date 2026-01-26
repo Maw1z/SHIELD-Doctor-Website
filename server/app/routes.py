@@ -354,7 +354,7 @@ def get_latest_risk():
 # --- APPOINTMENTS ---
 
 # Create GET appointments
-@app.route('/v1/appointments', methods=['GET'])
+@app.route('/api/v1/appointments', methods=['GET'])
 def get_appointments():
     doctor_id = request.args.get('doctor_id')
     
@@ -397,7 +397,7 @@ def get_appointments():
         return jsonify({"error": "Internal server error"}), 500
 
 # Create POST appointments
-@app.route('/v1/appointments', methods=['POST'])
+@app.route('/api/v1/appointments', methods=['POST'])
 def create_appointment():
     data = request.json
     
