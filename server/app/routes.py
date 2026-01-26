@@ -500,7 +500,7 @@ def get_patients_for_doctor():
         cur = conn.cursor()
 
         cur.execute("""
-            SELECT 
+            SELECT DISTINCT ON (p.uuid)
                 p.uuid,
                 p.name,
                 p.dob,
@@ -515,6 +515,7 @@ def get_patients_for_doctor():
             LEFT JOIN risk_assessments r ON p.uuid = r.patient_id
             LEFT JOIN appointments a ON p.uuid = a.patient_id
             WHERE d.doctor_id = %s
+            ORDER BY p.uuid, a.patient_last_checked DESC
         """, (doctor_uuid,))
 
         patients = cur.fetchall()
