@@ -1,9 +1,17 @@
 import { Clock } from "lucide-react";
 import { getStatusFromScore } from "@/utils/getStatusFromScore";
-import { formatDateTime } from "../../utils/formatDateTime";
+import { formatDateTime } from "@/utils/formatDateTime";
 
-export default function MonitoringStatus({ patient }: { patient: any }) {
-  const status = getStatusFromScore(patient.risk_score || 0);
+interface MonitoringProps {
+  riskScore: number;
+  lastSeen: string | null;
+}
+
+export default function MonitoringStatus({
+  riskScore,
+  lastSeen,
+}: MonitoringProps) {
+  const status = getStatusFromScore(riskScore || 0);
 
   return (
     <div className="space-y-3">
@@ -25,9 +33,7 @@ export default function MonitoringStatus({ patient }: { patient: any }) {
         <span className="text-xs font-semibold">Last Seen:</span>
         <div className="flex items-center gap-1 text-xs text-slate-500">
           <Clock className="h-3 w-3" />
-          {patient.patient_last_checked
-            ? formatDateTime(patient.patient_last_checked)
-            : "Never"}
+          {lastSeen ? formatDateTime(lastSeen) : "No past visits"}
         </div>
       </div>
     </div>

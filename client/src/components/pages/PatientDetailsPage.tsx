@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,28 +26,37 @@ import DoctorNotes from "../patient_details/DoctorNotes";
 import UpcomingAppointments from "../patient_details/UpcomingAppointments";
 import PatientNotFoundPage from "./PatientNotFoundPage";
 
-import { type Patient } from "@/constants/patients";
-
 export default function PatientDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [patient, setPatient] = useState<Patient | null>(null);
+  const [patient, setPatient] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    const fetchPatientData = async () => {
-      if (!id) return;
+    const auth = getAuth();
 
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        fetchPatientData(user.uid);
+      } else {
+        setIsLoading(false);
+        setError(true);
+      }
+    });
+
+    const fetchPatientData = async (doctorUid: string) => {
+      if (!id) return;
       try {
         setIsLoading(true);
         const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
-
-        const response = await axios.get<Patient>(`${baseUrl}/patient`, {
-          params: { uuid: id },
+        const response = await axios.get(`${baseUrl}/patient`, {
+          params: {
+            uuid: id,
+            doctor_id: doctorUid,
+          },
         });
-
         setPatient(response.data);
         setError(false);
       } catch (err) {
@@ -57,7 +67,7 @@ export default function PatientDetailsPage() {
       }
     };
 
-    fetchPatientData();
+    return () => unsubscribe();
   }, [id]);
 
   if (isLoading) {
@@ -97,7 +107,7 @@ export default function PatientDetailsPage() {
                 Personal Information
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col md:flex-row items-center justify-start gap-6 md:gap-12 ">
+            <CardContent className="flex flex-col md:flex-row items-center justify-start gap-6 md:gap-12">
               <PatientDetails patient={patient} />
             </CardContent>
           </Card>
@@ -139,7 +149,10 @@ export default function PatientDetailsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <MonitoringStatus patient={patient} />
+                  <MonitoringStatus
+                    riskScore={patient.risk_score}
+                    lastSeen={patient.last_seen}
+                  />
                 </CardContent>
               </Card>
 
@@ -150,7 +163,7 @@ export default function PatientDetailsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-xs">
-                  <DoctorNotes />
+                  <DoctorNotes notes={patient.doctor_notes} />
                 </CardContent>
               </Card>
 
@@ -161,7 +174,9 @@ export default function PatientDetailsPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <UpcomingAppointments patient={patient} />
+                  <UpcomingAppointments
+                    appointments={patient.upcoming_appointments}
+                  />
                 </CardContent>
               </Card>
             </div>
