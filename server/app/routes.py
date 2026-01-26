@@ -356,10 +356,16 @@ def get_latest_risk():
 # Create GET appointments
 @app.route('/v1/appointments', methods=['GET'])
 def get_appointments():
+    doctor_id = request.args.get('doctor_id')
+    
+    if not doctor_id:
+        return jsonify({"error": "doctor_id query parameter is required"}), 400
+
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        cur.execute("""
+        
+        query = """
             SELECT 
                 appointment_id, 
                 doctor_id, 
@@ -370,21 +376,25 @@ def get_appointments():
                 created_at, 
                 updated_at 
             FROM appointments 
-            ORDER BY appointment_datetime DESC
-        """)
-        appointments = cur.fetchall()
-        cur.close()
-        conn.close()
+            WHERE doctor_id = %s
+            ORDER BY appointment_datetime ASC
+        """
+        
+        cur.execute(query, (doctor_id,))
+        rows = cur.fetchall()
         
         # Convert datetime objects to ISO strings for JSON
-        for row in appointments:
-            for key, value in row.items():
-                if isinstance(value, datetime):
-                    row[key] = value.isoformat()
-                    
-        return jsonify(appointments), 200
+        for row in rows:
+            for k, v in row.items():
+                if isinstance(v, datetime):
+                    row[k] = v.isoformat()
+        
+        cur.close()
+        conn.close()
+        return jsonify(rows), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"Database error: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
 # Create POST appointments
 @app.route('/v1/appointments', methods=['POST'])
