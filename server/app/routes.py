@@ -70,38 +70,79 @@ def create_patient():
 @app.route('/api/v1/patient', methods=['GET'])
 def get_patient_by_uuid():
     patient_uuid = request.args.get('uuid')
-    if not patient_uuid:
-        return jsonify({"error": "uuid is required"}), 400
+    doctor_id = request.args.get('doctor_id')
+    
+    if not patient_uuid or not doctor_id:
+        return jsonify({"error": "uuid and doctor_id are required"}), 400
 
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
 
+        # Fetch Patient Basic Info & Risk Score
         cur.execute("""
             SELECT 
                 p.uuid, p.name, p.height, p.weight, p.dob, 
-                p.phone_number, p.email, p.gender, 
-                a.title AS appointment_title,
-                a.appointment_datetime
-            FROM patients p 
-            LEFT JOIN appointments a ON p.uuid = a.patient_id
+                p.phone_number, p.email, p.gender,
+                r.risk_score, r.risk_label
+            FROM patients p
+            LEFT JOIN risk_assessments r ON p.uuid = r.patient_id
             WHERE p.uuid = %s
-            ORDER BY a.appointment_datetime DESC
-            LIMIT 1
+            ORDER BY r.created_at DESC LIMIT 1
         """, (patient_uuid,))
-
         patient = cur.fetchone()
+
+        if not patient:
+            cur.close()
+            conn.close()
+            return jsonify({"message": "Patient not found"}), 404
+
+        # Fetch Last Seen 
+        cur.execute("""
+            SELECT appointment_datetime 
+            FROM appointments 
+            WHERE patient_id = %s AND doctor_id = %s 
+            AND appointment_datetime < NOW()
+            ORDER BY appointment_datetime DESC LIMIT 1
+        """, (patient_uuid, doctor_id))
+        last_seen = cur.fetchone()
+        patient['last_seen'] = (
+            last_seen['appointment_datetime'].isoformat() if last_seen else None
+        )
+
+        # Fetch Doctor Notes as an array
+        cur.execute("""
+            SELECT note_id, note_title, note_content, created_at 
+            FROM doctor_notes 
+            WHERE patient_id = %s AND doctor_id = %s
+            ORDER BY created_at DESC
+        """, (patient_uuid, doctor_id))
+        patient['doctor_notes'] = cur.fetchall()
+
+        # Fetch Upcoming Appointments as an array
+        cur.execute("""
+            SELECT appointment_id, title, appointment_datetime 
+            FROM appointments 
+            WHERE patient_id = %s AND doctor_id = %s
+            AND appointment_datetime >= NOW()
+            ORDER BY appointment_datetime ASC
+        """, (patient_uuid, doctor_id))
+        patient['upcoming_appointments'] = cur.fetchall()
+
         cur.close()
         conn.close()
 
-        if not patient:
-            return jsonify({"message": "Patient not found"}), 404
-
-        # Convert date objects to strings for JSON compatibility
+        # Formatting for JSON compatibility
         if patient['dob']:
             patient['dob'] = str(patient['dob'])
-        if patient['appointment_datetime']:
-            patient['appointment_datetime'] = patient['appointment_datetime'].isoformat()
+        if patient['risk_score']:
+            patient['risk_score'] = float(patient['risk_score'])
+            
+        # Format timestamps in arrays
+        for note in patient['doctor_notes']:
+            note['created_at'] = note['created_at'].isoformat()
+        for appt in patient['upcoming_appointments']:
+            appt['appointment_datetime'] = appt['appointment_datetime'].isoformat()
 
         return jsonify(patient), 200
 
