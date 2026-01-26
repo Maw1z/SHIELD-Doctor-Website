@@ -515,7 +515,7 @@ def get_patients_for_doctor():
             LEFT JOIN risk_assessments r ON p.uuid = r.patient_id
             LEFT JOIN appointments a ON p.uuid = a.patient_id
             WHERE d.doctor_id = %s
-            ORDER BY p.uuid, a.patient_last_checked DESC
+            ORDER BY p.uuid, a.patient_last_checked DESC NULLS LAST
         """, (doctor_uuid,))
 
         patients = cur.fetchall()
