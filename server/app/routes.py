@@ -4,6 +4,7 @@ from app.db import get_db_connection
 from psycopg2.extras import RealDictCursor
 import logging
 import decimal
+from datetime import datetime
 
 @app.route('/')
 def home():
@@ -72,32 +73,40 @@ def get_patient_by_uuid():
     if not patient_uuid:
         return jsonify({"error": "uuid is required"}), 400
 
-    conn = get_db_connection()
-    cur = conn.cursor()
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
 
-    cur.execute("""
-        SELECT uuid, name, height, weight, dob, phone_number, email, gender
-        FROM patients
-        WHERE uuid = %s
-    """, (patient_uuid,))
+        cur.execute("""
+            SELECT 
+                p.uuid, p.name, p.height, p.weight, p.dob, 
+                p.phone_number, p.email, p.gender, 
+                a.title AS appointment_title,
+                a.appointment_datetime
+            FROM patients p 
+            LEFT JOIN appointments a ON p.uuid = a.patient_id
+            WHERE p.uuid = %s
+            ORDER BY a.appointment_datetime DESC
+            LIMIT 1
+        """, (patient_uuid,))
 
-    patient = cur.fetchone()
-    cur.close()
-    conn.close()
+        patient = cur.fetchone()
+        cur.close()
+        conn.close()
 
-    if not patient:
-        return jsonify({"message": "Patient not found"}), 404
+        if not patient:
+            return jsonify({"message": "Patient not found"}), 404
 
-    return jsonify({
-        "uuid": patient[0],
-        "name": patient[1],
-        "height": patient[2],
-        "weight": patient[3],
-        "dob": str(patient[4]),
-        "phone_number": patient[5],
-        "email": patient[6],
-        "gender": patient[7]
-    }), 200
+        # Convert date objects to strings for JSON compatibility
+        if patient['dob']:
+            patient['dob'] = str(patient['dob'])
+        if patient['appointment_datetime']:
+            patient['appointment_datetime'] = patient['appointment_datetime'].isoformat()
+
+        return jsonify(patient), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # --- VITALS ---
 
@@ -341,6 +350,80 @@ def get_latest_risk():
     finally:
         if conn:
             conn.close()
+
+# --- APPOINTMENTS ---
+
+# Create GET appointments
+@app.route('/v1/appointments', methods=['GET'])
+def get_appointments():
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute("""
+            SELECT 
+                appointment_id, 
+                doctor_id, 
+                patient_id, 
+                title, 
+                appointment_datetime, 
+                patient_last_checked, 
+                created_at, 
+                updated_at 
+            FROM appointments 
+            ORDER BY appointment_datetime DESC
+        """)
+        appointments = cur.fetchall()
+        cur.close()
+        conn.close()
+        
+        # Convert datetime objects to ISO strings for JSON
+        for row in appointments:
+            for key, value in row.items():
+                if isinstance(value, datetime):
+                    row[key] = value.isoformat()
+                    
+        return jsonify(appointments), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Create POST appointments
+@app.route('/v1/appointments', methods=['POST'])
+def create_appointment():
+    data = request.json
+    
+    required_fields = ['doctor_id', 'patient_id', 'title', 'appointment_datetime']
+    if not all(field in data for field in required_fields):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        
+        query = """
+            INSERT INTO appointments (doctor_id, patient_id, title, appointment_datetime)
+            VALUES (%s, %s, %s, %s)
+            RETURNING *;
+        """
+        cur.execute(query, (
+            data['doctor_id'], 
+            data['patient_id'], 
+            data['title'], 
+            data['appointment_datetime']
+        ))
+        
+        new_appointment = cur.fetchone()
+        conn.commit()
+        cur.close()
+        conn.close()
+
+        # Convert datetimes
+        for key, value in new_appointment.items():
+            if isinstance(value, datetime):
+                new_appointment[key] = value.isoformat()
+
+        return jsonify(new_appointment), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 # --- DOCTORS ---
 
