@@ -1,7 +1,7 @@
 import { type ColumnDef } from "@tanstack/react-table";
 import { type Patient } from "@/constants/patients";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
