@@ -4,7 +4,7 @@ from app.db import get_db_connection
 from psycopg2.extras import RealDictCursor
 import logging
 import decimal
-from datetime import datetime
+from datetime import datetime, date
 
 @app.route('/')
 def home():
@@ -150,8 +150,6 @@ def get_patient_by_uuid():
         return jsonify({"error": str(e)}), 500
 
 # GET patient details (for mobile app)
-from datetime import date
-
 @app.route('/api/v1/patient-details', methods=['GET'])
 def get_basic_patient_details():
     patient_uuid = request.args.get('uuid')
@@ -206,27 +204,36 @@ def get_basic_patient_details():
 
 # Creating POST log vitals route
 @app.route('/api/v1/log_vitals', methods=['POST'])
-def log_vital():
-    data = request.json
+def log_vitals_batch():
+    data_list = request.json
+    if not isinstance(data_list, list):
+        data_list = [data_list] 
+
     conn = get_db_connection()
     try:
         cur = conn.cursor()
         query = """
             INSERT INTO vitals 
-            (patient_id, heart_rate, hrv, spo2, bp_systolic, bp_diastolic, activity_level) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s);
+            (patient_id, heart_rate, hrv, spo2, bp_systolic, bp_diastolic, activity_level, recorded_at) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s);
         """
-        cur.execute(query, (
-            data['patient_id'],
-            data.get('heart_rate'),
-            data.get('hrv'),
-            data.get('spo2'),
-            data.get('bp_systolic'),
-            data.get('bp_diastolic'),
-            data.get('activity_level')
-        ))
+        
+        batch_data = [
+            (
+                d['patient_id'],
+                d.get('heart_rate'),
+                d.get('hrv'),
+                d.get('spo2'),
+                d.get('bp_systolic'),
+                d.get('bp_diastolic'),
+                d.get('activity_level'),
+                d.get('recorded_at') 
+            ) for d in data_list
+        ]
+        
+        cur.executemany(query, batch_data)
         conn.commit()
-        return jsonify({"message": "Vitals logged successfully"}), 201
+        return jsonify({"message": f"Successfully logged {len(batch_data)} records"}), 201
     except Exception as e:
         return jsonify({"error": str(e)}), 400
     finally:
