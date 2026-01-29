@@ -66,7 +66,7 @@ def create_patient():
         cur.close()
         conn.close()
 
-# Create GET patient details based on UUID endpoint
+# Create GET patient details based on UUID endpoint (for doctor portal)
 @app.route('/api/v1/patient', methods=['GET'])
 def get_patient_by_uuid():
     patient_uuid = request.args.get('uuid')
@@ -143,6 +143,59 @@ def get_patient_by_uuid():
             note['created_at'] = note['created_at'].isoformat()
         for appt in patient['upcoming_appointments']:
             appt['appointment_datetime'] = appt['appointment_datetime'].isoformat()
+
+        return jsonify(patient), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# GET patient details (for mobile app)
+from datetime import date
+
+@app.route('/api/v1/patient-details', methods=['GET'])
+def get_basic_patient_details():
+    patient_uuid = request.args.get('uuid')
+
+    if not patient_uuid:
+        return jsonify({"error": "uuid is required"}), 400
+
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        cur.execute("""
+            SELECT 
+                name, height, weight, dob, 
+                phone_number, email, gender
+            FROM patients 
+            WHERE uuid = %s
+        """, (patient_uuid,))
+        
+        patient = cur.fetchone()
+
+        cur.close()
+        conn.close()
+
+        if not patient:
+            return jsonify({"message": "Patient not found"}), 404
+
+        # Calculate age from DOB
+        if patient['dob']:
+            today = date.today()
+            dob = patient['dob']
+            age = (
+                today.year - dob.year - 
+                ((today.month, today.day) < (dob.month, dob.day))
+            )
+            patient['age'] = age
+            # Convert date object to string for JSON serialization
+            patient['dob'] = dob.isoformat()
+
+        # Ensure numeric types are JSON serializable
+        if patient['height']:
+            patient['height'] = float(patient['height'])
+        if patient['weight']:
+            patient['weight'] = float(patient['weight'])
 
         return jsonify(patient), 200
 
