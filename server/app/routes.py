@@ -520,7 +520,8 @@ def get_appointments_patient():
                 d.specialization as doctor_specialization
             FROM appointments a
             JOIN doctors d ON a.doctor_id = d.doctor_id
-            WHERE a.patient_id = %s
+            WHERE a.patient_id = %s 
+            AND a.appointment_datetime >= NOW()
             ORDER BY a.appointment_datetime ASC
         """, (patient_id,))
         appointments = cur.fetchall()
