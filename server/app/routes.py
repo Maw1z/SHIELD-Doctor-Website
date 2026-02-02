@@ -82,13 +82,10 @@ def get_patient_by_uuid():
         # Fetch Patient Basic Info & Risk Score
         cur.execute("""
             SELECT 
-                p.uuid, p.name, p.height, p.weight, p.dob, 
-                p.phone_number, p.email, p.gender,
-                r.risk_score, r.risk_label
-            FROM patients p
-            LEFT JOIN risk_assessments r ON p.uuid = r.patient_id
-            WHERE p.uuid = %s
-            ORDER BY r.created_at DESC LIMIT 1
+                uuid, name, height, weight, dob, 
+                phone_number, email, gender
+            FROM patients 
+            WHERE uuid = %s
         """, (patient_uuid,))
         patient = cur.fetchone()
 
@@ -97,7 +94,27 @@ def get_patient_by_uuid():
             conn.close()
             return jsonify({"message": "Patient not found"}), 404
 
-        # Fetch Last Seen 
+        # Fetch Latest Risk & Reason Codes
+        cur.execute("""
+            SELECT risk_score, risk_label, reason_codes, created_at
+            FROM risk_assessments 
+            WHERE patient_id = %s
+            ORDER BY created_at DESC LIMIT 1
+        """, (patient_uuid,))
+        latest_risk = cur.fetchone()
+
+        # Fetch Daily Stats (Min, Max, Avg) for the last 24 hours
+        cur.execute("""
+            SELECT 
+                MIN(risk_score) as min_score,
+                MAX(risk_score) as max_score,
+                AVG(risk_score) as avg_score
+            FROM risk_assessments
+            WHERE patient_id = %s AND created_at >= NOW() - INTERVAL '24 hours'
+        """, (patient_uuid,))
+        stats = cur.fetchone()
+
+        # Fetch Last Seen
         cur.execute("""
             SELECT appointment_datetime 
             FROM appointments 
@@ -135,10 +152,24 @@ def get_patient_by_uuid():
         # Formatting for JSON compatibility
         if patient['dob']:
             patient['dob'] = str(patient['dob'])
-        if patient['risk_score']:
-            patient['risk_score'] = float(patient['risk_score'])
+
+        # Format Risk Assessment Data
+        patient['risk_data'] = {
+            "current": float(latest_risk['risk_score']) if latest_risk else 0,
+            "label": latest_risk['risk_label'] if latest_risk else "N/A",
+            "reasons": latest_risk['reason_codes'] if latest_risk else [],
+            "stats": {
+                "min": float(stats['min_score']) if stats['min_score'] else 0,
+                "max": float(stats['max_score']) if stats['max_score'] else 0,
+                "avg": float(stats['avg_score']) if stats['avg_score'] else 0
+            }
+        }
+
+        # Keep top-level legacy keys if your sidebar components still use them
+        patient['risk_score'] = patient['risk_data']['current']
+        patient['risk_label'] = patient['risk_data']['label']
             
-        # Format timestamps in arrays
+        # Format Timestamps in Arrays
         for note in patient['doctor_notes']:
             note['created_at'] = note['created_at'].isoformat()
         for appt in patient['upcoming_appointments']:
@@ -147,6 +178,7 @@ def get_patient_by_uuid():
         return jsonify(patient), 200
 
     except Exception as e:
+        print(f"Error fetching patient: {e}")
         return jsonify({"error": str(e)}), 500
 
 # GET patient details (for mobile app)
