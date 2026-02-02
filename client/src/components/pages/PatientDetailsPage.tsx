@@ -14,6 +14,7 @@ import {
   Contact2,
   Fingerprint,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 
 import Header from "../Header";
@@ -25,6 +26,7 @@ import MonitoringStatus from "../patient_details/MonitoringStatus";
 import DoctorNotes from "../patient_details/DoctorNotes";
 import UpcomingAppointments from "../patient_details/UpcomingAppointments";
 import PatientNotFoundPage from "./PatientNotFoundPage";
+import RiskAssessment from "../patient_details/RiskAssessment";
 
 export default function PatientDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -122,6 +124,19 @@ export default function PatientDetailsPage() {
             </CardHeader>
             <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-6">
               <PhysicalBiometrics patient={patient} />
+            </CardContent>
+          </Card>
+
+          {/* AI Risk Assessment Card */}
+          <Card className="w-full shadow-sm">
+            <CardHeader className="border-b">
+              <CardTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                AI-Driven Risk Assessment
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <RiskAssessment riskData={patient.risk_data} />
             </CardContent>
           </Card>
 
