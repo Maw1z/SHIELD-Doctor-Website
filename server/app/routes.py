@@ -153,11 +153,23 @@ def get_patient_by_uuid():
         if patient['dob']:
             patient['dob'] = str(patient['dob'])
 
+        raw_reasons = latest_risk['reason_codes'] if latest_risk else []
+        
+        # If the database returned a string (JSON), parse it into a list
+        if isinstance(raw_reasons, str):
+            try:
+                import json
+                processed_reasons = json.loads(raw_reasons)
+            except:
+                processed_reasons = []
+        else:
+            processed_reasons = raw_reasons
+
         # Format Risk Assessment Data
         patient['risk_data'] = {
             "current": float(latest_risk['risk_score']) if latest_risk else 0,
             "label": latest_risk['risk_label'] if latest_risk else "N/A",
-            "reasons": latest_risk['reason_codes'] if latest_risk else [],
+            "reasons": processed_reasons,
             "stats": {
                 "min": float(stats['min_score']) if stats['min_score'] else 0,
                 "max": float(stats['max_score']) if stats['max_score'] else 0,
