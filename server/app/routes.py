@@ -361,28 +361,34 @@ def get_latest_vitals():
 # Creating POST risk scores route
 @app.route('/api/v1/risk-scores', methods=['POST'])
 def log_risk():
-    data = request.json
+    data_list = request.json
+    if not isinstance(data_list, list):
+        data_list = [data_list]
+
     conn = get_db_connection()
     try:
         cur = conn.cursor()
-
-        # Convert Python list to JSON string for the database
-        reason_codes_json = json.dumps(data.get('reason_codes', []))
-        
         query = """
             INSERT INTO risk_assessments 
-            (patient_id, risk_score, risk_label, reason_codes) 
-            VALUES (%s, %s, %s, %s);
+            (patient_id, risk_score, risk_label, reason_codes, created_at) 
+            VALUES (%s, %s, %s, %s, %s);
         """
-        cur.execute(query, (
-            data['patient_id'],
-            data['risk_score'],
-            data['risk_label'], # e.g., 'High', 'Medium'
-            reason_codes_json
-        ))
+        
+        batch_data = [
+            (
+                d['patient_id'],
+                d['risk_score'],
+                d['risk_label'],
+                json.dumps(d.get('reason_codes', [])),
+                d.get('created_at') 
+            ) for d in data_list
+        ]
+
+        cur.executemany(query, batch_data)
         conn.commit()
-        return jsonify({"message": "Risk assessment saved"}), 201
+        return jsonify({"message": f"Successfully logged {len(batch_data)} risk assessments"}), 201
     except Exception as e:
+        print(f"Error: {e}") 
         return jsonify({"error": str(e)}), 400
     finally:
         if conn: 
