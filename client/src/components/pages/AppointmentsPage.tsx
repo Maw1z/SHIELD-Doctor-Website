@@ -17,25 +17,35 @@ export default function AppointmentsPage() {
   return (
     <>
       <GradientWrapper />
-      <div className="h-screen flex flex-col p-8 overflow-hidden font-poppins">
-        <div className="mx-auto w-full max-w-7xl flex flex-col h-full">
+      <div className="min-h-screen lg:h-screen flex flex-col p-4 sm:p-6 lg:p-8 lg:overflow-hidden font-poppins">
+        <div className="mx-auto w-full max-w-7xl flex flex-col h-full space-y-4">
           <Header />
-          <Card className="flex-1 min-h-0 flex flex-col">
-            <CardHeader className="flex flex-row justify-between items-center">
-              <CardTitle className="text-3xl">Appointments</CardTitle>
-              <Button onClick={() => setDialogOpen(true)}>
-                <Plus className="mr-2" />
+
+          <Card className="flex-1 min-h-0 flex flex-col overflow-hidden">
+            <CardHeader className="flex flex-col md:flex-row lg:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
+              <CardTitle className="text-2xl lg:text-3xl">
+                Appointments
+              </CardTitle>
+              <Button
+                onClick={() => setDialogOpen(true)}
+                className="w-full sm:w-auto"
+              >
+                <Plus className="mr-2 h-4 w-4" />
                 New Appointment
               </Button>
             </CardHeader>
-            <CardContent>
-              <AppointmentTable
-                columns={allAppointmentColumns}
-                data={appointmentsData}
-                isLoading={isAppointmentsLoading}
-              />
+
+            <CardContent className="flex-1 min-h-0 overflow-hidden pb-4">
+              <div className="h-125 lg:h-full">
+                <AppointmentTable
+                  columns={allAppointmentColumns}
+                  data={appointmentsData}
+                  isLoading={isAppointmentsLoading}
+                />
+              </div>
             </CardContent>
           </Card>
+
           <AppointmentDialog
             open={dialogOpen}
             onOpenChange={setDialogOpen}

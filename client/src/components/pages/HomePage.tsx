@@ -17,18 +17,20 @@ export default function HomePage() {
   return (
     <>
       <GradientWrapper />
-      <div className="h-screen flex flex-col p-8 overflow-hidden font-poppins">
-        <div className="mx-auto w-full max-w-7xl flex flex-col h-full">
+      <div className="min-h-screen lg:h-screen flex flex-col p-4 sm:p-6 lg:p-8 lg:overflow-hidden font-poppins">
+        <div className="mx-auto w-full max-w-7xl flex flex-col h-full space-y-4 sm:space-y-6">
           <Header />
-          <div className="grid grid-cols-2 gap-6 flex-1 min-h-0 pb-4">
-            <div className="flex flex-col gap-6 h-full min-h-0">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:flex-1 lg:min-h-0">
+            <div className="flex flex-col gap-4 sm:gap-6 lg:h-full lg:min-h-0">
               {/* Quick Stats */}
-              <Card className="shrink-0">
+              <Card className="lg:shrink-0">
                 <CardHeader>
-                  <CardTitle className="text-3xl">Quick Stats</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl lg:text-3xl">
+                    Quick Stats
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
                     <StatCard
                       title="Patients"
                       value={isPatientsLoading ? "..." : patientsData.length}
@@ -39,43 +41,51 @@ export default function HomePage() {
               </Card>
 
               {/* Patients List */}
-              <Card className="flex-1 min-h-0 flex flex-col">
+              <Card className="flex flex-col lg:flex-1 lg:min-h-0">
                 <CardHeader>
-                  <CardTitle className="text-3xl">Patient Lists</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl lg:text-3xl">
+                    Patient Lists
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="flex-1 min-h-0 overflow-hidden pb-2">
-                  <CustomPatientTable
-                    data={patientsData}
-                    isLoading={isPatientsLoading}
-                    error={patientsError}
-                  />
+                <CardContent className="pb-2 lg:flex-1 lg:min-h-0 lg:overflow-hidden">
+                  <div className="h-96 sm:h-112 lg:h-full">
+                    <CustomPatientTable
+                      data={patientsData}
+                      isLoading={isPatientsLoading}
+                      error={patientsError}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            <div className="flex flex-col gap-6 h-full min-h-0">
+            <div className="flex flex-col gap-4 sm:gap-6 lg:h-full lg:min-h-0">
               {/* Upcoming Appointments Card */}
-              <Card className="shrink-0 flex flex-col min-h-0">
-                <CardHeader className="">
-                  <CardTitle className="text-3xl">
+              <Card className="flex flex-col lg:flex-1 lg:min-h-0">
+                <CardHeader>
+                  <CardTitle className="text-xl sm:text-2xl lg:text-3xl">
                     Upcoming Appointments
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pb-2">
-                  <AppointmentTable
-                    columns={dashboardAppointmentColumns}
-                    data={appointmentsData}
-                    isLoading={isAppointmentsLoading}
-                  />
+                <CardContent className="pb-2 lg:flex-1 lg:min-h-0 lg:overflow-hidden">
+                  <div className="h-80 sm:h-96 lg:h-full">
+                    <AppointmentTable
+                      columns={dashboardAppointmentColumns}
+                      data={appointmentsData}
+                      isLoading={isAppointmentsLoading}
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
-              <Card className="flex-1 min-h-0 flex flex-col">
+              <Card className="flex flex-col lg:flex-1 lg:min-h-0">
                 <CardHeader>
-                  <CardTitle className="text-3xl">Empty Card</CardTitle>
+                  <CardTitle className="text-xl sm:text-2xl lg:text-3xl">
+                    Empty Card
+                  </CardTitle>
                 </CardHeader>
-                <CardContent className="flex-1 overflow-auto text-sm text-muted-foreground italic">
-                  To add something here later
+                <CardContent className="h-48 sm:h-56 lg:flex-1 lg:min-h-0 overflow-auto text-sm text-muted-foreground italic">
+                  Add something here
                 </CardContent>
               </Card>
             </div>

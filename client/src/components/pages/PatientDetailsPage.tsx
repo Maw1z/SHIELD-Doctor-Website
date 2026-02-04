@@ -88,7 +88,7 @@ export default function PatientDetailsPage() {
     <div className="relative min-h-screen w-full">
       <GradientWrapper />
 
-      <div className="relative z-10 flex flex-col p-4 md:p-8 font-poppins text-slate-900">
+      <div className="relative z-10 flex flex-col p-4 sm:p-6 lg:p-8 font-poppins text-slate-900">
         <div className="mx-auto w-full max-w-7xl flex flex-col gap-6">
           <Header />
 

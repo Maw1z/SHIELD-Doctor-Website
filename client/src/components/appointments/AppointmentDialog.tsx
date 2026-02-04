@@ -107,7 +107,7 @@ export function AppointmentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="w-[95vw] sm:max-w-md overflow-y-auto max-h-[90vh]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">
@@ -123,6 +123,7 @@ export function AppointmentDialog({
               <Label htmlFor="title">Appointment Title</Label>
               <Input
                 id="title"
+                className="text-base"
                 placeholder="Routine Checkup"
                 value={formData.title}
                 onChange={(e) =>
@@ -140,31 +141,24 @@ export function AppointmentDialog({
                 }
                 value={formData.patient_id}
               >
-                <SelectTrigger className="w-full" id="patient">
+                <SelectTrigger className="w-full text-base" id="patient">
                   <SelectValue
                     placeholder={
-                      isPatientsLoading
-                        ? "Loading patients..."
-                        : "Select a patient"
+                      isPatientsLoading ? "Loading..." : "Select a patient"
                     }
                   />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-50">
                   {patientsData.map((patient) => (
                     <SelectItem key={patient.uuid} value={patient.uuid}>
                       {patient.name}
                     </SelectItem>
                   ))}
-                  {patientsData.length === 0 && !isPatientsLoading && (
-                    <div className="p-2 text-sm text-muted-foreground text-center">
-                      No patients found
-                    </div>
-                  )}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="grid gap-2">
                 <Label>Date</Label>
                 <Popover>
@@ -172,15 +166,17 @@ export function AppointmentDialog({
                     <Button
                       variant={"outline"}
                       className={cn(
-                        "justify-start text-left font-normal",
+                        "w-full justify-start text-left font-normal text-base sm:text-sm",
                         !date && "text-muted-foreground",
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                      <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                      <span className="truncate">
+                        {date ? format(date, "PPP") : "Pick a date"}
+                      </span>
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={date}
@@ -199,6 +195,7 @@ export function AppointmentDialog({
                 <Input
                   id="time"
                   type="time"
+                  className="text-base sm:text-sm"
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
                   required
@@ -207,16 +204,21 @@ export function AppointmentDialog({
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex-col-reverse sm:flex-row gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || isPatientsLoading}>
+            <Button
+              type="submit"
+              disabled={isSubmitting || isPatientsLoading}
+              className="w-full sm:w-auto"
+            >
               {isSubmitting && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}

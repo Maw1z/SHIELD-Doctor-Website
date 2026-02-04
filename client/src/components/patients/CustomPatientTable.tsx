@@ -59,22 +59,25 @@ export function CustomPatientTable({
   }
 
   return (
-    <div className="flex flex-col h-full space-y-4">
+    <div className="flex flex-col h-full space-y-3 sm:space-y-4">
       <Input
         placeholder="Search patients..."
         value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
         onChange={(e) =>
           table.getColumn("name")?.setFilterValue(e.target.value)
         }
-        className="w-full shrink-0"
+        className="w-full text-sm sm:text-base shrink-0"
       />
-      <div className="rounded-md border overflow-y-auto flex-1">
+      <div className="rounded-md border flex-1 overflow-auto min-h-0">
         <Table>
           <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className="text-xs sm:text-sm whitespace-nowrap"
+                  >
                     {flexRender(
                       header.column.columnDef.header,
                       header.getContext(),
@@ -89,7 +92,7 @@ export function CustomPatientTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-red-500"
+                  className="h-20 sm:h-24 text-center text-red-500 text-xs sm:text-sm"
                 >
                   {error}
                 </TableCell>
@@ -98,7 +101,10 @@ export function CustomPatientTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-3">
+                    <TableCell
+                      key={cell.id}
+                      className="py-2 sm:py-3 text-xs sm:text-sm"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -111,7 +117,7 @@ export function CustomPatientTable({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="h-20 sm:h-24 text-center text-xs sm:text-sm"
                 >
                   No patients found.
                 </TableCell>
