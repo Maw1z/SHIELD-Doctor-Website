@@ -14,7 +14,7 @@ import {
   Contact2,
   Fingerprint,
   Loader2,
-  Sparkles,
+  // Sparkles,
 } from "lucide-react";
 
 import Header from "../Header";
@@ -26,7 +26,7 @@ import MonitoringStatus from "../patient_details/MonitoringStatus";
 import DoctorNotes from "../patient_details/DoctorNotes";
 import UpcomingAppointments from "../patient_details/UpcomingAppointments";
 import PatientNotFoundPage from "./PatientNotFoundPage";
-import RiskAssessment from "../patient_details/RiskAssessment";
+// import RiskAssessment from "../patient_details/RiskAssessment";
 
 export default function PatientDetailsPage() {
   const { id } = useParams<{ id: string }>();

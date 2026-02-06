@@ -20,14 +20,12 @@ interface AppointmentTableProps {
   columns: any[];
   data: any[];
   isLoading?: boolean;
-  maxHeight?: string;
 }
 
 export function AppointmentTable({
   columns,
   data,
   isLoading,
-  maxHeight = "max-h-100",
 }: AppointmentTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
 
