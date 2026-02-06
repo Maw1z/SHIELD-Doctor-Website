@@ -128,7 +128,7 @@ export default function PatientDetailsPage() {
           </Card>
 
           {/* AI Risk Assessment Card */}
-          <Card className="w-full shadow-sm">
+          {/* <Card className="w-full shadow-sm">
             <CardHeader className="border-b">
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="h-5 w-5 text-primary" />
@@ -138,7 +138,7 @@ export default function PatientDetailsPage() {
             <CardContent>
               <RiskAssessment riskData={patient.risk_data} />
             </CardContent>
-          </Card>
+          </Card> */}
 
           {/* Bottom Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 pb-10">
