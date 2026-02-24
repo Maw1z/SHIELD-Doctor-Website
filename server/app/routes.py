@@ -1,10 +1,14 @@
-from app import app
+import os
+# from app import app, twilio_client 
 from flask import json, jsonify, request
-from app.db import get_db_connection
+# from app.db import get_db_connection
 from psycopg2.extras import RealDictCursor
 import logging
 import decimal
 from datetime import datetime, date
+
+from . import app, twilio_client 
+from .db import get_db_connection
 
 @app.route('/')
 def home():
@@ -793,15 +797,81 @@ def log_sos_event():
         
         event_id = cur.fetchone()['event_id']
         
+        # Get Patient Name for the alert message
+        cur.execute("SELECT name FROM patients WHERE uuid = %s", (patient_id,))
+        patient = cur.fetchone()
+        patient_name = patient['name'] if patient else "A SHIELD User"
+        
+        # Fetch Emergency Contacts
         cur.execute("SELECT name, phone_number FROM emergency_contacts WHERE patient_id = %s", (patient_id,))
         contacts = cur.fetchall()
         
         conn.commit()
+
+        try:
+            if vitals and len(vitals) > 0:
+                latest_hr = vitals[0].get('heart_rate', 'unknown')
+            else:
+                latest_hr = "unknown"
+        except Exception:
+            latest_hr = "unknown"
+
+        now = datetime.now()
+        formatted_time = now.strftime("%I:%M %p") 
+        formatted_date = now.strftime("%B %d, %Y") 
+        maps_url = f"https://www.google.com/maps/search/?api=1&query={lat},{lng}"
+        
+        # Message format
+        sms_body = (
+            f"{patient_name} has activated an emergency SOS on SHIELD at {formatted_time} on {formatted_date}. "
+            f"Current location: {maps_url}. "
+            f"Please check in with them immediately or contact emergency services if they don't respond."
+        )
+
+        # Trigger Twilio Alerts
+        maps_url = f"https://www.google.com/maps/search/?api=1&query={lat},{lng}"
+
+        from_number = os.getenv('TWILIO_NUMBER')
+        verified_caller_id = os.getenv('VERIFIED_SENDER_NUMBER')
+        dispatcher_number = os.getenv('DISPATCHER_NUMBER')
+
+        # Loop through and SMS each family contact
+        for contact in contacts:
+            try:
+                twilio_client.messages.create(
+                    body=sms_body,
+                    from_=from_number,
+                    to=contact['phone_number']
+                )
+            except Exception as e:
+                print(f"Failed SMS to {contact['phone_number']}: {e}")
+
+        # Single Automated Call to the Dispatcher (Demo)
+        if dispatcher_number:
+            try:
+                twilio_client.calls.create(
+                    twiml=f'''<Response>
+                                <Say voice="Polly.Amy" language="en-GB">
+                                    Emergency Dispatch Request. 
+                                    This is an automated report from the SHIELD Health System. 
+                                    Patient {patient_name} is in distress. 
+                                    Location: latitude {lat}, longitude {lng}.
+                                    Latest vitals indicate a heart rate of {latest_hr} beats per minute.
+                                    A digital report has been logged. Please dispatch to the coordinates provided.
+                                </Say>
+                            </Response>''',
+                    from_=verified_caller_id,
+                    to=dispatcher_number 
+                )
+            except Exception as e:
+                print(f"Failed Dispatcher Call: {e}")
+
         return jsonify({
             "status": "success", 
             "event_id": event_id,
-            "alerted_contacts": contacts
+            "alerted_contacts_count": len(contacts)
         }), 201
+
     except Exception as e:
         if conn: 
             conn.rollback()
