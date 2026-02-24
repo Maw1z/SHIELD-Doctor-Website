@@ -824,14 +824,15 @@ def log_sos_event():
         # INFOBIP Branded SMS
         infobip_base = os.getenv('INFOBIP_BASE_URL')
         infobip_key = os.getenv('INFOBIP_API_KEY')
-        
+        infobip_number = os.getenv('INFOBIP_NUMBER')
+
         if infobip_base and infobip_key:
             infobip_url = f"https://{infobip_base}/sms/2/text/advanced"
             infobip_payload = {
                 "messages": [
                     {
                         "destinations": [{"to": c['phone_number']} for c in emergency_contacts],
-                        "from": "SHIELD",
+                        "from": infobip_number,
                         "text": sms_body
                     }
                 ]
