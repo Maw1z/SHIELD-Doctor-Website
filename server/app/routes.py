@@ -815,11 +815,13 @@ def log_sos_event():
         maps_url = f"https://www.google.com/maps/search/?api=1&query={lat},{lng}"
         
         # Message format
-        sms_body = (
-            f"{patient_name} has activated an emergency SOS on SHIELD at {formatted_time} on {formatted_date}. "
-            f"Current location: {maps_url}. "
-            f"Please check in with them immediately or contact emergency services if they don't respond."
-        )
+        # sms_body = (
+        #     f"{patient_name} has activated an emergency SOS on SHIELD at {formatted_time} on {formatted_date}. "
+        #     f"Current location: {maps_url}. "
+        #     f"Please check in with them immediately or contact emergency services if they don't respond."
+        # )
+        sms_body = f"SHIELD Alert: {patient_name} has triggered an SOS. This is a test."
+
 
         from_number = os.getenv('TWILIO_NUMBER')
         verified_caller_id = os.getenv('VERIFIED_SENDER_NUMBER')
