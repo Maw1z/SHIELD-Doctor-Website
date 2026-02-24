@@ -856,6 +856,8 @@ def log_sos_event():
 
         for contact in emergency_contacts:
             phone = contact.get('phone_number')
+            if not phone.startswith('+'):
+                phone = '+' + phone 
             if not phone: 
                 continue
             
