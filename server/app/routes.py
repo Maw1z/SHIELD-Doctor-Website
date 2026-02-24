@@ -1,5 +1,6 @@
 import os
 from urllib import response
+import requests
 # from app import app, twilio_client 
 from flask import json, jsonify, request
 # from app.db import get_db_connection
@@ -778,7 +779,7 @@ def get_patients_for_doctor():
 # Create sos event
 @app.route('/api/v1/sos/event', methods=['POST'])
 def log_sos_event():
-    data = request.get_json()
+    data = request.get_json()    
     patient_id = data.get('patient_id')
     lat = data.get('latitude')
     lng = data.get('longitude')
@@ -814,16 +815,39 @@ def log_sos_event():
         formatted_date = now.strftime("%B %d, %Y") 
         maps_url = f"https://www.google.com/maps/search/?api=1&query={lat},{lng}"
         
-        # Message format
-        # sms_body = (
-        #     f"{patient_name} has activated an emergency SOS on SHIELD at {formatted_time} on {formatted_date}. "
-        #     f"Current location: {maps_url}. "
-        #     f"Please check in with them immediately or contact emergency services if they don't respond."
-        # )
-        sms_body = f"SHIELD Alert: {patient_name} has triggered an SOS. This is a test."
+        sms_body = (
+            f"{patient_name} has activated an emergency SOS on SHIELD at {formatted_time} on {formatted_date}. "
+            f"Current location: {maps_url}. "
+            f"Please check in with them immediately or contact emergency services if they don't respond."
+        )
 
+        # INFOBIP Branded SMS
+        infobip_base = os.getenv('INFOBIP_BASE_URL')
+        infobip_key = os.getenv('INFOBIP_API_KEY')
+        
+        if infobip_base and infobip_key:
+            infobip_url = f"https://{infobip_base}/sms/2/text/advanced"
+            infobip_payload = {
+                "messages": [
+                    {
+                        "destinations": [{"to": c['phone_number']} for c in emergency_contacts],
+                        "from": "SHIELD",
+                        "text": sms_body
+                    }
+                ]
+            }
+            infobip_headers = {
+                "Authorization": f"App {infobip_key}",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+            try:
+                sms_res = requests.post(infobip_url, json=infobip_payload, headers=infobip_headers, timeout=5)
+                print(f"Infobip SMS Response: {sms_res.status_code}")
+            except Exception as e:
+                print(f"Infobip SMS Failed: {e}")
 
-        from_number = os.getenv('TWILIO_NUMBER')
+        # TWILIO Voice Call
         verified_caller_id = os.getenv('VERIFIED_SENDER_NUMBER')
         dispatcher_number = os.getenv('DISPATCHER_NUMBER')
 
@@ -833,45 +857,33 @@ def log_sos_event():
                 continue
             
             try:
-                # Automated SMS
-                twilio_client.messages.create(
-                    body=sms_body,
-                    from_=from_number,
-                    to=phone
-                )
-
-                print(f"SMS SID: {response.sid}")   
-
-                # Automated Voice Call (TTS)
                 twilio_client.calls.create(
                     twiml=f'''<Response>
                                 <Say voice="Polly.Amy" language="en-GB">
-                                    Attention. {patient_name} has activated an emergency SOS on SHIELD at {formatted_time} on {formatted_date}. 
+                                    Attention. This is an emergency alert from SHIELD for {patient_name}. 
+                                    He has triggered an SOS at {formatted_time}. 
                                     His latest recorded heart rate was {latest_hr} beats per minute. 
-                                    His current location has been sent to your phone via text message. 
-                                    Please check in with him immediately or contact emergency services if he does not respond.
+                                    A message with his location has been sent to your number. 
+                                    Please check in with him immediately.
                                 </Say>
                             </Response>''',
-                    from_=verified_caller_id,
+                    from_=dispatcher_number,
                     to=phone
                 )
+                print(f"Twilio Call Triggered to {phone}")
             except Exception as twilio_e:
-                print(f"Twilio failed for {phone}: {twilio_e}")
-
-        # 5. Handle Dispatcher Call (if applicable)
-        if dispatcher_number:
-            # (Optional: Your dispatcher TTS logic here)
-            pass
+                print(f"Twilio Call Failed for {phone}: {twilio_e}")
 
         return jsonify({
             "status": "success", 
             "event_id": event_id,
-            "alerted_contacts_count": len(emergency_contacts)
+            "contacts_alerted": len(emergency_contacts)
         }), 201
 
     except Exception as e:
         if conn: 
             conn.rollback()
+        print(f"Critical SOS Error: {e}")
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
