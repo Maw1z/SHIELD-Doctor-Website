@@ -1,4 +1,5 @@
 import os
+from urllib import response
 # from app import app, twilio_client 
 from flask import json, jsonify, request
 # from app.db import get_db_connection
@@ -836,6 +837,8 @@ def log_sos_event():
                     from_=from_number,
                     to=phone
                 )
+
+                print(f"SMS SID: {response.sid}")   
 
                 # Automated Voice Call (TTS)
                 twilio_client.calls.create(
