@@ -815,11 +815,13 @@ def log_sos_event():
         formatted_date = now.strftime("%B %d, %Y") 
         maps_url = f"https://www.google.com/maps/search/?api=1&query={lat},{lng}"
         
-        sms_body = (
-            f"{patient_name} has activated an emergency SOS on SHIELD at {formatted_time} on {formatted_date}. "
-            f"Current location: {maps_url}. "
-            f"Please check in with them immediately or contact emergency services if they don't respond."
-        )
+        # sms_body = (
+        #     f"{patient_name} has activated an emergency SOS on SHIELD at {formatted_time} on {formatted_date}. "
+        #     f"Current location: {maps_url}. "
+        #     f"Please check in with them immediately or contact emergency services if they don't respond."
+        # )
+
+        sms_body = f"SHIELD EMERGENCY ALERT: {patient_name} is in distress. Please check the SHIELD portal for details."
 
         # INFOBIP Branded SMS
         infobip_base = os.getenv('INFOBIP_BASE_URL')
