@@ -1,16 +1,10 @@
-import os
-from urllib import response
-import requests
-# from app import app, twilio_client 
+from app import app
 from flask import json, jsonify, request
-# from app.db import get_db_connection
+from app.db import get_db_connection
 from psycopg2.extras import RealDictCursor
 import logging
 import decimal
 from datetime import datetime, date
-
-from . import app, twilio_client 
-from .db import get_db_connection
 
 @app.route('/')
 def home():
@@ -776,22 +770,16 @@ def get_patients_for_doctor():
 
 # --- SOS EVENTS ---
 
-# Create sos event
 @app.route('/api/v1/sos/event', methods=['POST'])
 def log_sos_event():
-    data = request.get_json()    
+    data = request.get_json()
     patient_id = data.get('patient_id')
     lat = data.get('latitude')
     lng = data.get('longitude')
-    vitals = data.get('vitals_snapshot', []) 
-    emergency_contacts = data.get('emergency_contacts', [])
+    vitals = data.get('vitals_snapshot') 
 
     if not patient_id:
         return jsonify({"error": "patient_id is required"}), 400
-
-    latest_hr = "unknown"
-    if isinstance(vitals, list) and len(vitals) > 0:
-        latest_hr = vitals[0].get('heart_rate', 'unknown')
 
     conn = get_db_connection()
     try:
@@ -805,90 +793,18 @@ def log_sos_event():
         
         event_id = cur.fetchone()['event_id']
         
-        cur.execute("SELECT name FROM patients WHERE uuid = %s", (patient_id,))
-        patient_row = cur.fetchone()
-        patient_name = patient_row['name'] if patient_row else "A SHIELD User"
-        conn.commit()
-
-        now = datetime.now()
-        formatted_time = now.strftime("%I:%M %p") 
-        formatted_date = now.strftime("%B %d, %Y") 
-        maps_url = f"https://www.google.com/maps/search/?api=1&query={lat},{lng}"
+        cur.execute("SELECT name, phone_number FROM emergency_contacts WHERE patient_id = %s", (patient_id,))
+        contacts = cur.fetchall()
         
-        # sms_body = (
-        #     f"{patient_name} has activated an emergency SOS on SHIELD at {formatted_time} on {formatted_date}. "
-        #     f"Current location: {maps_url}. "
-        #     f"Please check in with them immediately or contact emergency services if they don't respond."
-        # )
-
-        sms_body = f"SHIELD EMERGENCY ALERT: {patient_name} is in distress. Please check the SHIELD portal for details."
-
-        # INFOBIP Branded SMS
-        infobip_base = os.getenv('INFOBIP_BASE_URL')
-        infobip_key = os.getenv('INFOBIP_API_KEY')
-        infobip_number = os.getenv('INFOBIP_NUMBER')
-
-        if infobip_base and infobip_key:
-            infobip_url = f"https://{infobip_base}/sms/2/text/advanced"
-            infobip_payload = {
-                "messages": [
-                    {
-                        "destinations": [{"to": c['phone_number']} for c in emergency_contacts],
-                        "from": infobip_number,
-                        "text": sms_body
-                    }
-                ]
-            }
-            infobip_headers = {
-                "Authorization": f"App {infobip_key}",
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-            try:
-                sms_res = requests.post(infobip_url, json=infobip_payload, headers=infobip_headers, timeout=5)
-                print(f"Infobip SMS Response: {sms_res.status_code}")
-            except Exception as e:
-                print(f"Infobip SMS Failed: {e}")
-
-        # TWILIO Voice Call
-        verified_caller_id = os.getenv('VERIFIED_SENDER_NUMBER')
-        dispatcher_number = os.getenv('DISPATCHER_NUMBER')
-
-        for contact in emergency_contacts:
-            phone = contact.get('phone_number')
-            if not phone.startswith('+'):
-                phone = '+' + phone 
-            if not phone: 
-                continue
-            
-            try:
-                twilio_client.calls.create(
-                    twiml=f'''<Response>
-                                <Say voice="Polly.Amy" language="en-GB">
-                                    Attention. This is an emergency alert from SHIELD for {patient_name}. 
-                                    He has triggered an SOS at {formatted_time}. 
-                                    His latest recorded heart rate was {latest_hr} beats per minute. 
-                                    A message with his location has been sent to your number. 
-                                    Please check in with him immediately.
-                                </Say>
-                            </Response>''',
-                    from_=dispatcher_number,
-                    to=phone
-                )
-                print(f"Twilio Call Triggered to {phone}")
-            except Exception as twilio_e:
-                print(f"Twilio Call Failed for {phone}: {twilio_e}")
-
+        conn.commit()
         return jsonify({
             "status": "success", 
             "event_id": event_id,
-            "contacts_alerted": len(emergency_contacts)
+            "alerted_contacts": contacts
         }), 201
-
     except Exception as e:
         if conn: 
             conn.rollback()
-        print(f"Critical SOS Error: {e}")
         return jsonify({"error": str(e)}), 500
     finally:
         conn.close()
