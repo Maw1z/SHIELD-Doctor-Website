@@ -1,4 +1,4 @@
-import { AlertCircle, Activity, Heart, CheckCircle, X } from "lucide-react";
+import { AlertCircle, Activity, Heart } from "lucide-react";
 
 interface PatientAlert {
   alert_id: number;
