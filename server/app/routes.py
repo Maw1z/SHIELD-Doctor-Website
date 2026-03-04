@@ -746,13 +746,16 @@ def get_patients_for_doctor():
                 p.gender,
                 p.phone_number,
                 r.risk_score,
-                a.patient_last_checked
+                (SELECT appointment_datetime 
+                FROM appointments 
+                WHERE patient_id = p.uuid 
+                AND appointment_datetime < NOW() 
+                ORDER BY appointment_datetime DESC LIMIT 1) as last_seen
             FROM patients p
             JOIN doctor_assigned d ON p.uuid = d.patient_id
             LEFT JOIN risk_assessments r ON p.uuid = r.patient_id
-            LEFT JOIN appointments a ON p.uuid = a.patient_id
             WHERE d.doctor_id = %s
-            ORDER BY p.uuid, a.patient_last_checked DESC NULLS LAST
+            ORDER BY p.uuid
         """, (doctor_uuid,))
 
         patients = cur.fetchall()
@@ -786,7 +789,7 @@ def get_patients_for_doctor():
                 "gender": p[5],
                 "phone_number": p[6],
                 "risk_score": p[7],
-                "patient_last_checked": p[8].isoformat() if p[8] else None
+                "last_seen": p[8].isoformat() if p[8] else None
             }
             for p in patients
         ]
