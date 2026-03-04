@@ -43,23 +43,29 @@ export const allColumns: ColumnDef<Patient>[] = [
   },
   {
     accessorKey: "risk_score",
+    id: "status",
     header: "Status",
+    sortingFn: "alphanumeric",
     cell: ({ row }) => {
-      const score = row.getValue("risk_score") as number;
+      const score = row.getValue("status") as number;
       const status = getStatusFromScore(score);
       return (
         <div className="flex gap-2 items-center">
-          <div className={`w-2 h-2 rounded-full ${statusColors[status]}`} />
+          <div
+            className={`w-2 h-2 rounded-full ${
+              statusColors[status as keyof typeof statusColors]
+            }`}
+          />
           <span className="text-sm">{status}</span>
         </div>
       );
     },
   },
   {
-    accessorKey: "patient_last_checked",
-    header: "Last Check",
+    accessorKey: "last_seen",
+    header: "Last Seen",
     cell: ({ row }) => {
-      const date = row.getValue("patient_last_checked") as string;
+      const date = row.getValue("last_seen") as string;
       if (!date)
         return <div className="text-muted-foreground text-xs">Never</div>;
 
@@ -103,7 +109,7 @@ export const allColumns: ColumnDef<Patient>[] = [
 
 export const dashboardColumns: ColumnDef<Patient>[] = [
   allColumns[0], // "name"
-  allColumns[4], // "status"
+  allColumns[4], // "status" (mapped to risk_score)
   allColumns[5], // "lastCheck"
   allColumns[6], // "actions"
 ];

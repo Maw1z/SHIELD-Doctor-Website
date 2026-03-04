@@ -35,7 +35,10 @@ export function CustomPatientTable({
   isLoading,
   error,
 }: CustomPatientTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  // Setting the initial sorting state to status descending
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "status", desc: true },
+  ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
   const table = useReactTable({
@@ -47,6 +50,25 @@ export function CustomPatientTable({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     state: { sorting, columnFilters },
+    // Custom sorting logic to ensure critical is always first
+    sortingFns: {
+      statusPriority: (rowA, rowB, columnId) => {
+        const valA = rowA.getValue(columnId) as string;
+        const valB = rowB.getValue(columnId) as string;
+
+        const priority: Record<string, number> = {
+          Critical: 0,
+          Urgent: 1,
+          Stable: 2,
+          Pending: 3,
+        };
+
+        const aPriority = priority[valA] ?? 99;
+        const bPriority = priority[valB] ?? 99;
+
+        return aPriority - bPriority;
+      },
+    },
   });
 
   if (isLoading) {

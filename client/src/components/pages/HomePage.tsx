@@ -96,7 +96,7 @@ export default function HomePage() {
                 <CardContent className="lg:flex-1 lg:min-h-0 px-0 pb-2">
                   <div className="overflow-y-auto h-full px-6">
                     {isAlertsLoading ? (
-                      <div className="flex items-center justify-center h-fit border rounded-md">
+                      <div className="flex items-center justify-center h-48 border rounded-md">
                         <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
                         <p>Monitoring Live Alerts..</p>
                       </div>

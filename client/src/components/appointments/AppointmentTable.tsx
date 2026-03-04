@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -27,10 +27,23 @@ export function AppointmentTable({
   data,
   isLoading,
 }: AppointmentTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const upcomingData = useMemo(() => {
+    const now = new Date().getTime();
+    return data.filter((appointment) => {
+      const appointmentTime = new Date(
+        appointment.appointment_datetime,
+      ).getTime();
+      return appointmentTime > now;
+    });
+  }, [data]);
+
+  // Setting default sorting to show the closest appointment first
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "appointment_datetime", desc: false },
+  ]);
 
   const table = useReactTable({
-    data,
+    data: upcomingData,
     columns,
     state: { sorting },
     onSortingChange: setSorting,
@@ -91,7 +104,7 @@ export function AppointmentTable({
                   colSpan={columns.length}
                   className="h-20 sm:h-24 text-center text-xs sm:text-sm"
                 >
-                  No appointments.
+                  No upcoming appointments.
                 </TableCell>
               </TableRow>
             )}

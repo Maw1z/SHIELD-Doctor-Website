@@ -15,6 +15,7 @@ import {
   Fingerprint,
   Loader2,
   // Sparkles,
+  ShieldAlert,
 } from "lucide-react";
 
 import Header from "../Header";
@@ -76,6 +77,7 @@ export default function PatientDetailsPage() {
   if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
+        <GradientWrapper />
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
@@ -175,7 +177,7 @@ export default function PatientDetailsPage() {
               <Card>
                 <CardHeader className="border-b">
                   <CardTitle className="text-xs uppercase flex items-center gap-2 tracking-widest">
-                    <FileText className="h-5 w-5" /> Alerts
+                    <ShieldAlert className="h-5 w-5" /> Alerts
                   </CardTitle>
                 </CardHeader>
                 <CardContent>

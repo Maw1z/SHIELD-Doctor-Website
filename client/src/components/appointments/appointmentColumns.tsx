@@ -60,12 +60,16 @@ export const allAppointmentColumns: ColumnDef<Appointment>[] = [
     },
   },
   {
-    accessorKey: "patient_last_checked",
+    accessorKey: "last_seen",
     header: "Last Checked",
     cell: ({ row }) => {
-      const date = row.getValue("patient_last_checked") as string | null;
+      const date = row.getValue("last_seen") as string | null;
       if (!date)
-        return <div className="text-muted-foreground text-xs">Never</div>;
+        return (
+          <div className="text-muted-foreground text-xs italic">
+            First Visit
+          </div>
+        );
 
       const formatted = new Date(date).toLocaleString("en-US", {
         month: "short",
