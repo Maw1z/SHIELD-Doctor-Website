@@ -548,7 +548,11 @@ def get_appointments():
                 p.name AS patient_name,
                 a.title, 
                 a.appointment_datetime, 
-                a.patient_last_checked, 
+                (SELECT appointment_datetime 
+                FROM appointments 
+                WHERE patient_id = a.patient_id 
+                AND appointment_datetime < a.appointment_datetime 
+                ORDER BY appointment_datetime DESC LIMIT 1) as last_seen,
                 a.created_at
             FROM appointments a
             INNER JOIN patients p ON a.patient_id = p.uuid
