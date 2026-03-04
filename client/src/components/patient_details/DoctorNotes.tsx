@@ -27,7 +27,7 @@ export default function DoctorNotes({ notes }: { notes: Note[] }) {
           <p className="text-slate-700 leading-relaxed mb-1">
             {note.note_content}
           </p>
-          <p className="text-muted-foreground text-[9px]">
+          <p className="text-muted-foreground text-[11px]">
             {new Date(note.created_at).toLocaleDateString(undefined, {
               year: "numeric",
               month: "long",

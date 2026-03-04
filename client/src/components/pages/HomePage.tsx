@@ -5,14 +5,19 @@ import GradientWrapper from "@/components/GradientWrapper";
 import { CustomPatientTable } from "@/components/patients/CustomPatientTable";
 import { StatCard } from "@/components/StatCard";
 import { AppointmentTable } from "../appointments/AppointmentTable";
+import { AlertItem } from "../AlertItem";
+import { dashboardAppointmentColumns } from "../appointments/appointmentColumns";
 
 import { usePatients } from "@/hooks/usePatients";
 import { useAppointments } from "@/hooks/useAppointments";
-import { dashboardAppointmentColumns } from "../appointments/appointmentColumns";
+import { useAlerts } from "@/hooks/useAlerts";
+
+import { Loader2 } from "lucide-react";
 
 export default function HomePage() {
   const { patientsData, isPatientsLoading, patientsError } = usePatients();
   const { appointmentsData, isAppointmentsLoading } = useAppointments();
+  const { alertsData, isAlertsLoading } = useAlerts();
 
   return (
     <>
@@ -35,7 +40,10 @@ export default function HomePage() {
                       title="Patients"
                       value={isPatientsLoading ? "..." : patientsData.length}
                     />
-                    <StatCard title="Alerts" value={2} />
+                    <StatCard
+                      title="Alerts Today"
+                      value={isAlertsLoading ? "..." : alertsData.length}
+                    />
                   </div>
                 </CardContent>
               </Card>
@@ -78,14 +86,32 @@ export default function HomePage() {
                 </CardContent>
               </Card>
 
+              {/* Alerts Card */}
               <Card className="flex flex-col lg:flex-1 lg:min-h-0">
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between">
                   <CardTitle className="text-xl sm:text-2xl lg:text-3xl">
-                    Empty Card
+                    Alerts
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="h-48 sm:h-56 lg:flex-1 lg:min-h-0 overflow-auto text-sm text-muted-foreground italic">
-                  Add something here
+                <CardContent className="lg:flex-1 lg:min-h-0 px-0 pb-2">
+                  <div className="overflow-y-auto h-full px-6">
+                    {isAlertsLoading ? (
+                      <div className="flex items-center justify-center h-fit border rounded-md">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+                        <p>Monitoring Live Alerts..</p>
+                      </div>
+                    ) : alertsData.length > 0 ? (
+                      alertsData.map((alert) => (
+                        <AlertItem alert={alert} showPatientName />
+                      ))
+                    ) : (
+                      <div className="flex items-center justify-center h-full py-10">
+                        <p className="text-sm text-muted-foreground italic">
+                          No alerts for today
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
             </div>

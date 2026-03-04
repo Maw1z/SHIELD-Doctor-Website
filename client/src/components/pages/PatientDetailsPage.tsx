@@ -27,6 +27,7 @@ import DoctorNotes from "../patient_details/DoctorNotes";
 import UpcomingAppointments from "../patient_details/UpcomingAppointments";
 import PatientNotFoundPage from "./PatientNotFoundPage";
 // import RiskAssessment from "../patient_details/RiskAssessment";
+import PatientAlerts from "../patient_details/PatientAlerts";
 
 export default function PatientDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -168,6 +169,17 @@ export default function PatientDetailsPage() {
                     riskScore={patient.risk_score}
                     lastSeen={patient.last_seen}
                   />
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="border-b">
+                  <CardTitle className="text-xs uppercase flex items-center gap-2 tracking-widest">
+                    <FileText className="h-5 w-5" /> Alerts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <PatientAlerts alerts={patient.alerts} />
                 </CardContent>
               </Card>
 
