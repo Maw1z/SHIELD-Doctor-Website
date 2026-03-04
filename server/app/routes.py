@@ -114,6 +114,26 @@ def get_patient_by_uuid():
         """, (patient_uuid,))
         stats = cur.fetchone()
 
+        # Fetch Alerts
+        cur.execute("""
+            SELECT 
+                a.alert_id,
+                a.alert_type,
+                a.vital_value,
+                a.threshold_value,
+                a.activity_level,
+                a.triggered_at,
+                a.acknowledged
+            FROM vital_alerts a
+            JOIN patients p ON a.patient_id = p.uuid
+            JOIN doctor_assigned da ON p.uuid = da.patient_id
+            WHERE da.doctor_id = %s
+            AND a.patient_id = %s
+            ORDER BY a.triggered_at DESC;
+        """, (doctor_id, patient_uuid))
+
+        patient['alerts'] = cur.fetchall()
+
         # Fetch Last Seen
         cur.execute("""
             SELECT appointment_datetime 
@@ -186,6 +206,10 @@ def get_patient_by_uuid():
             note['created_at'] = note['created_at'].isoformat()
         for appt in patient['upcoming_appointments']:
             appt['appointment_datetime'] = appt['appointment_datetime'].isoformat()
+
+        # Format Alerts
+        for alert in patient['alerts']:
+            alert['triggered_at'] = alert['triggered_at'].isoformat()
 
         return jsonify(patient), 200
 
