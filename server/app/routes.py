@@ -5,7 +5,15 @@ from psycopg2.extras import RealDictCursor
 import logging
 import decimal
 from datetime import datetime, date
-from firebase_admin import auth
+from firebase_admin import auth, credentials # type: ignore
+
+try:
+    cred = credentials.Certificate("serviceAccountKey.json")
+    firebase_admin.initialize_app(cred)  # type: ignore # noqa: F821
+    print("Firebase Admin Initialized successfully.")
+except Exception as e:
+    print(f"Error initializing Firebase Admin: {e}")
+
 
 @app.route('/')
 def home():
@@ -72,15 +80,20 @@ def create_patient():
 def get_patient_by_uuid():
     patient_uuid = request.args.get('uuid')
     
-        # 2. Get doctor_id from VERIFIED JWT
+    # Get doctor_id from verified jwt
     auth_header = request.headers.get('Authorization')
-    if not auth_header: return jsonify({"error": "No token"}), 401
+    logging.info(f"Received request for patient {patient_uuid} with auth header: {auth_header}")
+
+
+    if not auth_header: 
+        return jsonify({"error": "No token"}), 401
 
     try:
         id_token = auth_header.split('Bearer ')[1]
         decoded_token = auth.verify_id_token(id_token)
-        doctor_id = decoded_token['uid'] # Trusted ID
-    except:
+        doctor_id = decoded_token['uid'] 
+    except Exception as e:
+        logging.error(f"Firebase auth error: {e}")
         return jsonify({"error": "Invalid token"}), 401
     
     if not patient_uuid or not doctor_id:
