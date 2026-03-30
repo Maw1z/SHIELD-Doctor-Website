@@ -15,6 +15,7 @@ import { type User, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig";
 import { LoaderCircle } from "lucide-react";
 import GradientWrapper from "./components/GradientWrapper";
+import ForbiddenPage from "./components/pages/ForbiddenPage";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -67,6 +68,7 @@ function App() {
           element={user ? <AppointmentsPage /> : <Navigate to="/forbidden" />}
         />
         <Route path="/" element={<Navigate to="/home" />} />
+        <Route path="/forbidden" element={<ForbiddenPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Toaster position="bottom-right" richColors />

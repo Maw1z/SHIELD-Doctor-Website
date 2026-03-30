@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import axios, { AxiosError } from "axios";
+import { type User, getAuth, onAuthStateChanged } from "firebase/auth";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,30 +41,41 @@ export default function PatientDetailsPage() {
   useEffect(() => {
     const auth = getAuth();
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
-        fetchPatientData(user.uid);
+        fetchPatientData(user);
       } else {
         setIsLoading(false);
         setError(true);
       }
     });
 
-    const fetchPatientData = async (doctorUid: string) => {
+    const fetchPatientData = async (user: User) => {
       if (!id) return;
       try {
         setIsLoading(true);
         const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
+        const idToken = await user.getIdToken();
+        console.log(idToken);
+
         const response = await axios.get(`${baseUrl}/patient`, {
-          params: {
-            uuid: id,
-            doctor_id: doctorUid,
+          params: { uuid: id },
+          headers: {
+            Authorization: `Bearer ${idToken}`,
           },
         });
         setPatient(response.data);
         setError(false);
       } catch (err) {
         console.error("Error fetching patient:", err);
+
+        const axiosError = err as AxiosError;
+
+        if (axiosError.response && axiosError.response.status === 403) {
+          navigate("/forbidden");
+          return;
+        }
+
         setError(true);
       } finally {
         setIsLoading(false);
