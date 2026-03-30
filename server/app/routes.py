@@ -1,3 +1,4 @@
+import os
 from app import app
 from flask import json, jsonify, request
 from app.db import get_db_connection
@@ -5,15 +6,33 @@ from psycopg2.extras import RealDictCursor
 import logging
 import decimal
 from datetime import datetime, date
-from firebase_admin import auth, credentials # type: ignore
+import firebase_admin
+from firebase_admin import auth, credentials
 
-try:
-    cred = credentials.Certificate("serviceAccountKey.json")
-    firebase_admin.initialize_app(cred)  # type: ignore # noqa: F821
-    print("Firebase Admin Initialized successfully.")
-except Exception as e:
-    print(f"Error initializing Firebase Admin: {e}")
+from dotenv import load_dotenv
 
+load_dotenv()
+
+def initialize_firebase():
+    if not firebase_admin._apps:
+        service_account_info = os.getenv('FIREBASE_SERVICE_ACCOUNT')
+        
+        if service_account_info:
+            # Load the JSON string into a Python dictionary
+            cert_dict = json.loads(service_account_info)
+            cred = credentials.Certificate(cert_dict)
+            firebase_admin.initialize_app(cred)
+            print("Firebase Admin initialized via Environment Variable")
+        else:
+            # Fallback for local development using the file
+            try:
+                cred = credentials.Certificate("serviceAccountKey.json")
+                firebase_admin.initialize_app(cred)
+                print("Firebase Admin initialized via Local File")
+            except Exception as e:
+                print(f"Could not initialize Firebase: {e}")
+
+initialize_firebase()
 
 @app.route('/')
 def home():
