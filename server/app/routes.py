@@ -5,6 +5,7 @@ from psycopg2.extras import RealDictCursor
 import logging
 import decimal
 from datetime import datetime, date
+from firebase_admin import auth
 
 @app.route('/')
 def home():
@@ -70,7 +71,17 @@ def create_patient():
 @app.route('/api/v1/patient', methods=['GET'])
 def get_patient_by_uuid():
     patient_uuid = request.args.get('uuid')
-    doctor_id = request.args.get('doctor_id')
+    
+        # 2. Get doctor_id from VERIFIED JWT
+    auth_header = request.headers.get('Authorization')
+    if not auth_header: return jsonify({"error": "No token"}), 401
+
+    try:
+        id_token = auth_header.split('Bearer ')[1]
+        decoded_token = auth.verify_id_token(id_token)
+        doctor_id = decoded_token['uid'] # Trusted ID
+    except:
+        return jsonify({"error": "Invalid token"}), 401
     
     if not patient_uuid or not doctor_id:
         return jsonify({"error": "uuid and doctor_id are required"}), 400
@@ -78,6 +89,19 @@ def get_patient_by_uuid():
     try:
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Check if patient is assigned to doctor
+        cur.execute("""
+            SELECT p.* 
+            FROM patients p
+            INNER JOIN doctor_assigned da ON p.uuid = da.patient_id
+            WHERE p.uuid = %s AND da.doctor_id = %s
+        """, (patient_uuid, doctor_id))
+        
+        patient = cur.fetchone()
+
+        if not patient:
+            return jsonify({"error": "Unauthorized: You do not have access to this patient"}), 403
 
         # Fetch Patient Basic Info & Risk Score
         cur.execute("""
