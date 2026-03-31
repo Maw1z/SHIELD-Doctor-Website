@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 import { usePatients } from "@/hooks/usePatients";
+import apiClient from "@/api/apiClient";
 
 interface AppointmentDialogProps {
   open: boolean;
@@ -78,9 +79,7 @@ export function AppointmentDialog({
       const combinedDateTime = new Date(date);
       combinedDateTime.setHours(parseInt(hours), parseInt(minutes));
 
-      const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
-      await axios.post(`${baseUrl}/appointments`, {
-        doctor_id: doctorId,
+      await apiClient.post(`/appointments`, {
         patient_id: formData.patient_id,
         title: formData.title,
         appointment_datetime: combinedDateTime.toISOString(),

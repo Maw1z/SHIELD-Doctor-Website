@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { type Patient } from "@/constants/patients";
+import apiClient from "@/api/apiClient";
 
 interface ApiResponse {
   doctor_uuid: string;
@@ -17,21 +17,19 @@ export function usePatients() {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        fetchPatients(user.uid);
+        fetchPatients();
       } else {
         setIsPatientsLoading(false);
         setPatientsError("No authenticated user found.");
       }
     });
 
-    const fetchPatients = async (doctorUuid: string) => {
+    const fetchPatients = async () => {
       try {
         setIsPatientsLoading(true);
-        const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
-        const response = await axios.get<ApiResponse>(
-          `${baseUrl}/patient-doctor`,
-          { params: { doctor_uuid: doctorUuid } },
-        );
+
+        const response = await apiClient.get<ApiResponse>(`/patient-doctor`);
+
         setPatientsData(response.data.patients);
         setPatientsError(null);
       } catch (err) {

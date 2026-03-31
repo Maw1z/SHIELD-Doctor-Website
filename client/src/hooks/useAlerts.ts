@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import axios from "axios";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import apiClient from "@/api/apiClient";
 
 export function useAlerts() {
   const [allAlerts, setAllAlerts] = useState([]);
@@ -8,25 +8,19 @@ export function useAlerts() {
   const [alertsError, setAlertsError] = useState<string | null>(null);
   const [currentUid, setCurrentUid] = useState<string | null>(null);
 
-  const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
+  const fetchAlerts = useCallback(async () => {
+    setAlertsError(null);
+    try {
+      const response = await apiClient.get(`/alerts`);
 
-  const fetchAlerts = useCallback(
-    async (doctorUuid: string) => {
-      setAlertsError(null);
-      try {
-        const response = await axios.get(
-          `${baseUrl}/alerts?doctor_id=${doctorUuid}`,
-        );
-        setAllAlerts(response.data);
-      } catch (err: any) {
-        console.error("Error fetching alerts:", err);
-        setAlertsError(err.response?.data?.error || "Failed to load alerts");
-      } finally {
-        setIsAlertsLoading(false);
-      }
-    },
-    [baseUrl],
-  );
+      setAllAlerts(response.data);
+    } catch (err: any) {
+      console.error("Error fetching alerts:", err);
+      setAlertsError(err.response?.data?.error || "Failed to load alerts");
+    } finally {
+      setIsAlertsLoading(false);
+    }
+  }, []);
 
   // Derived state for today's alerts
   const alertsData = useMemo(() => {
@@ -42,7 +36,7 @@ export function useAlerts() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUid(user.uid);
-        fetchAlerts(user.uid);
+        fetchAlerts();
       } else {
         setIsAlertsLoading(false);
         setAlertsError("No authenticated user");
@@ -57,7 +51,7 @@ export function useAlerts() {
     if (!currentUid) return;
 
     const interval = setInterval(() => {
-      fetchAlerts(currentUid);
+      fetchAlerts();
     }, 30000);
 
     return () => clearInterval(interval);
@@ -68,6 +62,6 @@ export function useAlerts() {
     alertsCountToday: alertsData.length,
     isAlertsLoading,
     alertsError,
-    refresh: () => currentUid && fetchAlerts(currentUid),
+    refresh: () => currentUid && fetchAlerts(),
   };
 }

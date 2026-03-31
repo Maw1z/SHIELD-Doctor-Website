@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios, { AxiosError } from "axios";
 import { type User, getAuth, onAuthStateChanged } from "firebase/auth";
+import apiClient from "@/api/apiClient";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,27 +44,22 @@ export default function PatientDetailsPage() {
 
     const unsubscribe = onAuthStateChanged(auth, (user: User | null) => {
       if (user) {
-        fetchPatientData(user);
+        fetchPatientData();
       } else {
         setIsLoading(false);
         setError(true);
       }
     });
 
-    const fetchPatientData = async (user: User) => {
+    const fetchPatientData = async () => {
       if (!id) return;
       try {
         setIsLoading(true);
-        const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
-        const idToken = await user.getIdToken();
-        console.log(idToken);
 
-        const response = await axios.get(`${baseUrl}/patient`, {
+        const response = await apiClient.get(`/patient`, {
           params: { uuid: id },
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
         });
+
         setPatient(response.data);
         setError(false);
       } catch (err) {

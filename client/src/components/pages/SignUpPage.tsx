@@ -5,7 +5,6 @@ import { auth } from "@/firebase/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { deleteUser } from "firebase/auth";
 import { getFriendlyAuthError } from "@/lib/auth-errors";
-import axios from "axios";
 
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
@@ -31,6 +30,7 @@ import {
 import { toast } from "sonner";
 
 import GradientWrapper from "../GradientWrapper";
+import apiClient from "@/api/apiClient";
 
 const SPECIALIZATIONS = [
   "General Medicine",
@@ -90,15 +90,19 @@ export default function SignUpPage() {
       );
       user = userCredential.user;
 
-      const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
-
-      const response = await axios.post(`${baseUrl}/doctor`, {
-        doctor_id: user.uid,
+      const response = await apiClient.post(`/doctor`, {
         name: formData.name,
         specialization: formData.specialization,
         phone_number: phone,
         email: formData.email,
       });
+      // const response = await axios.post(`${baseUrl}/doctor`, {
+      //   doctor_id: user.uid,
+      //   name: formData.name,
+      //   specialization: formData.specialization,
+      //   phone_number: phone,
+      //   email: formData.email,
+      // });
 
       if (response.status === 201) {
         toast.success("Account created successfully!", {
@@ -123,6 +127,7 @@ export default function SignUpPage() {
       setLoading(false);
     }
   };
+
   return (
     <>
       <GradientWrapper />

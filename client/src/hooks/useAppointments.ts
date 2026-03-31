@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { type Appointment } from "@/constants/appointments";
+import apiClient from "@/api/apiClient";
 
 export function useAppointments() {
   const [appointmentsData, setAppointmentsData] = useState<Appointment[]>([]);
@@ -11,14 +12,12 @@ export function useAppointments() {
   );
   const [currentUid, setCurrentUid] = useState<string | null>(null);
 
-  const fetchAppointments = useCallback(async (doctorUuid: string) => {
+  const fetchAppointments = useCallback(async () => {
     setIsAppointmentsLoading(true);
     setAppointmentsError(null);
     try {
-      const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL;
-      const res = await axios.get(`${baseUrl}/appointments`, {
-        params: { doctor_id: doctorUuid },
-      });
+      const res = await apiClient.get(`/appointments`);
+
       setAppointmentsData(res.data);
     } catch (err: any) {
       setAppointmentsError(
@@ -34,7 +33,7 @@ export function useAppointments() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setCurrentUid(user.uid);
-        fetchAppointments(user.uid);
+        fetchAppointments();
       } else {
         setIsAppointmentsLoading(false);
         setAppointmentsError("No authenticated user");
@@ -48,6 +47,6 @@ export function useAppointments() {
     isAppointmentsLoading,
     appointmentsError,
     currentUid,
-    refresh: () => currentUid && fetchAppointments(currentUid),
+    refresh: () => currentUid && fetchAppointments(),
   };
 }
