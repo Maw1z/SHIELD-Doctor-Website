@@ -587,8 +587,17 @@ def get_latest_risk():
 # Create GET appointments (for doctor)
 @app.route('/api/v1/appointments', methods=['GET'])
 def get_appointments():
-    doctor_id = request.args.get('doctor_id')
+    auth_header = request.headers.get('Authorization')
+    if not auth_header: 
+        return jsonify({"error": "Unauthorized"}), 401
     
+    try:
+        id_token = auth_header.split('Bearer ')[1]
+        decoded_token = auth.verify_id_token(id_token)
+        doctor_id = decoded_token['uid'] 
+    except:
+        return jsonify({"error": "Invalid token"}), 401
+
     if not doctor_id:
         return jsonify({"error": "doctor_id query parameter is required"}), 400
 
@@ -697,9 +706,20 @@ def get_appointments_patient():
 # Create POST appointments
 @app.route('/api/v1/appointments', methods=['POST'])
 def create_appointment():
-    data = request.json
+    auth_header = request.headers.get('Authorization')
+    if not auth_header: 
+        return jsonify({"error": "Unauthorized"}), 401
     
-    required_fields = ['doctor_id', 'patient_id', 'title', 'appointment_datetime']
+    try:
+        id_token = auth_header.split('Bearer ')[1]
+        decoded_token = auth.verify_id_token(id_token)
+        doctor_id = decoded_token['uid'] 
+    except:
+        return jsonify({"error": "Invalid token"}), 401
+
+    data = request.json
+
+    required_fields = ['patient_id', 'title', 'appointment_datetime']
     if not all(field in data for field in required_fields):
         return jsonify({"error": "Missing required fields"}), 400
 
@@ -707,13 +727,23 @@ def create_appointment():
         conn = get_db_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
+        # Verify Doctor-Patient Relationship
+        cur.execute("""
+            SELECT 1 FROM doctor_assigned 
+            WHERE doctor_id = %s AND patient_id = %s
+        """, (doctor_id, data['patient_id']))
+        
+        if not cur.fetchone():
+            return jsonify({"error": "You are not authorized to book for this patient"}), 403
+
+        # INSERT using the 'doctor_id' from the TOKEN
         query = """
             INSERT INTO appointments (doctor_id, patient_id, title, appointment_datetime)
             VALUES (%s, %s, %s, %s)
             RETURNING *;
         """
         cur.execute(query, (
-            data['doctor_id'], 
+            doctor_id, 
             data['patient_id'], 
             data['title'], 
             data['appointment_datetime']
@@ -738,12 +768,22 @@ def create_appointment():
 # Create POST doctor api endpoint
 @app.route('/api/v1/doctor', methods=['POST'])
 def create_doctor():
+    auth_header = request.headers.get('Authorization')
+    if not auth_header: 
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        id_token = auth_header.split('Bearer ')[1]
+        decoded_token = auth.verify_id_token(id_token)
+        doctor_id = decoded_token['uid'] 
+    except:
+        return jsonify({"error": "Invalid token"}), 401
+
     data = request.get_json()
 
     if not data:
         return jsonify({"error": "Invalid or missing JSON body"}), 400
 
-    doctor_id = data.get('doctor_id')
     name = data.get('name')
 
     if not doctor_id or not name:
@@ -784,7 +824,16 @@ def create_doctor():
 # Create GET patients assigned to doctor endpoint
 @app.route('/api/v1/patient-doctor', methods=['GET'])
 def get_patients_for_doctor():
-    doctor_uuid = request.args.get('doctor_uuid')
+    auth_header = request.headers.get('Authorization')
+    if not auth_header: 
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        id_token = auth_header.split('Bearer ')[1]
+        decoded_token = auth.verify_id_token(id_token)
+        doctor_uuid = decoded_token['uid'] 
+    except:
+        return jsonify({"error": "Invalid token"}), 401
 
     if not doctor_uuid:
         return jsonify({
@@ -900,7 +949,16 @@ def log_sos_event():
 
 @app.route('/api/v1/alerts', methods=['GET'])
 def get_alerts_for_doctor():
-    doctor_id = request.args.get('doctor_id')
+    auth_header = request.headers.get('Authorization')
+    if not auth_header: 
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        id_token = auth_header.split('Bearer ')[1]
+        decoded_token = auth.verify_id_token(id_token)
+        doctor_id = decoded_token['uid'] 
+    except:
+        return jsonify({"error": "Invalid token"}), 401
 
     if not doctor_id:
         return jsonify({"error": "doctor_id is required"}), 400
