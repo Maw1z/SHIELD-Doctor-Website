@@ -5,6 +5,15 @@ import firebase_admin
 from firebase_admin import auth, credentials
 from dotenv import load_dotenv
 
+# Register Blueprints
+from routes.patient_routes import patient_bp
+from routes.vitals_routes import vitals_bp
+from routes.risk_routes import risk_bp
+from routes.appointments_routes import appointments_bp
+from routes.doctors_routes import doctors_bp
+from routes.sos_routes import sos_bp
+from routes.alerts_routes import alerts_bp
+
 load_dotenv()
 
 def initialize_firebase():
@@ -27,15 +36,6 @@ def initialize_firebase():
                 print(f"Could not initialize Firebase: {e}")
 
 initialize_firebase()
-
-# Register Blueprints
-from routes.patient_routes import patient_bp
-from routes.vitals_routes import vitals_bp
-from routes.risk_routes import risk_bp
-from routes.appointments_routes import appointments_bp
-from routes.doctors_routes import doctors_bp
-from routes.sos_routes import sos_bp
-from routes.alerts_routes import alerts_bp
 
 app.register_blueprint(patient_bp)
 app.register_blueprint(vitals_bp)
