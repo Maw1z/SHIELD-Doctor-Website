@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import axios from "axios";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { type Appointment } from "@/constants/appointments";
 import apiClient from "@/api/apiClient";
