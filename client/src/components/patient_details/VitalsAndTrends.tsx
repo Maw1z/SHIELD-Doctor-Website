@@ -20,7 +20,12 @@ export default function VitalsAndTrends() {
 
   if (loading && (!vitals || vitals.length === 0)) {
     return (
-      <div className="grid grid-cols-2 gap-4">
+      <div
+        className="grid grid-cols-2 gap-4"
+        role="status"
+        aria-label="Loading vitals charts"
+        aria-busy="true"
+      >
         {[...Array(4)].map((_, i) => (
           <div key={i} className="h-64 bg-slate-100 animate-pulse rounded-xl" />
         ))}
@@ -29,7 +34,11 @@ export default function VitalsAndTrends() {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div
+      className="grid grid-cols-2 gap-4"
+      role="region"
+      aria-label="Patient health vitals and trends"
+    >
       <HeartRateChart
         vitals={vitals || []}
         timeRange={timeRange}

@@ -19,9 +19,17 @@ export default function RiskAssessment({ riskData }: { riskData: any }) {
   const chartData = [{ value: current, fill: activeColor }];
 
   return (
-    <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
+    <div
+      className="flex flex-col md:flex-row items-center gap-8 md:gap-12"
+      role="region"
+      aria-label="Risk assessment analysis"
+    >
       {/* LEFT SIDE: Radial Chart with Conditional Color */}
-      <div className="relative h-32 w-32 shrink-0">
+      <div
+        className="relative h-32 w-32 shrink-0"
+        role="img"
+        aria-label={`Risk score chart: ${Math.round(current)}%`}
+      >
         <ResponsiveContainer width="100%" height="100%">
           <RadialBarChart
             innerRadius="80%"
@@ -45,7 +53,10 @@ export default function RiskAssessment({ riskData }: { riskData: any }) {
             />
           </RadialBarChart>
         </ResponsiveContainer>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div
+          className="absolute inset-0 flex flex-col items-center justify-center"
+          aria-hidden="true"
+        >
           <p
             className="text-2xl font-bold leading-none"
             style={{ color: activeColor }}
@@ -64,12 +75,16 @@ export default function RiskAssessment({ riskData }: { riskData: any }) {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
           <div className="flex items-center gap-3 border-r">
             <div>
-              <p className="text-xs text-muted-foreground font-bold uppercase leading-none mb-1">
+              <p
+                className="text-xs text-muted-foreground font-bold uppercase leading-none mb-1"
+                id="risk-status-label"
+              >
                 Status
               </p>
               <p
                 className="text-sm font-bold uppercase tracking-tight"
                 style={{ color: activeColor }}
+                aria-labelledby="risk-status-label"
               >
                 {label} Risk
               </p>
@@ -78,10 +93,16 @@ export default function RiskAssessment({ riskData }: { riskData: any }) {
 
           <div className="flex items-center gap-3 border-r pl-2">
             <div>
-              <p className="text-xs text-muted-foreground font-bold uppercase leading-none mb-1">
+              <p
+                className="text-xs text-muted-foreground font-bold uppercase leading-none mb-1"
+                id="24h-high-label"
+              >
                 24H High
               </p>
-              <p className="text-sm font-bold text-red-600">
+              <p
+                className="text-sm font-bold text-red-600"
+                aria-labelledby="24h-high-label"
+              >
                 {Math.round(stats.max)}%
               </p>
             </div>
@@ -89,10 +110,16 @@ export default function RiskAssessment({ riskData }: { riskData: any }) {
 
           <div className="flex items-center gap-3 pl-2">
             <div>
-              <p className="text-xs text-muted-foreground font-bold uppercase leading-none mb-1">
+              <p
+                className="text-xs text-muted-foreground font-bold uppercase leading-none mb-1"
+                id="24h-low-label"
+              >
                 24H Low
               </p>
-              <p className="text-sm font-bold text-green-600">
+              <p
+                className="text-sm font-bold text-green-600"
+                aria-labelledby="24h-low-label"
+              >
                 {Math.round(stats.min)}%
               </p>
             </div>
@@ -101,22 +128,30 @@ export default function RiskAssessment({ riskData }: { riskData: any }) {
 
         {/* Indicators Section */}
         <div className="pt-4 border-t border-slate-100 flex flex-col md:flex-row md:items-center gap-3">
-          <p className="text-xs text-muted-foreground font-bold uppercase whitespace-nowrap">
+          <p
+            className="text-xs text-muted-foreground font-bold uppercase whitespace-nowrap"
+            id="indicators-label"
+          >
             Risk Indicators:
           </p>
-          <div className="flex flex-wrap gap-1.5">
+          <div
+            className="flex flex-wrap gap-1.5"
+            role="list"
+            aria-labelledby="indicators-label"
+          >
             {Array.isArray(reasons) && reasons.length > 0 ? (
               reasons.map((r: string) => (
                 <Badge
                   key={r}
                   variant="secondary"
+                  role="listitem"
                   className="rounded-sm px-2 py-0 text-[10px] font-bold uppercase bg-slate-100 text-slate-600 border-none"
                 >
                   {r.replace("_", " ")}
                 </Badge>
               ))
             ) : (
-              <span className="text-xs font-bold text-slate-400">
+              <span className="text-xs font-bold text-slate-400" role="status">
                 SYSTEM PARAMETERS NORMAL
               </span>
             )}

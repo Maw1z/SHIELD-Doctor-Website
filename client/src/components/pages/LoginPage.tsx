@@ -47,7 +47,7 @@ export default function LoginPage() {
   return (
     <>
       <GradientWrapper />
-      <div className="min-h-screen font-poppins flex flex-col items-center justify-center px-4">
+      <main className="min-h-screen font-poppins flex flex-col items-center justify-center px-4">
         <div className="mb-2">
           <img
             src="/images/ShieldHorizontal.svg"
@@ -63,7 +63,11 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form
+              onSubmit={handleLogin}
+              className="space-y-4"
+              aria-labelledby="login-title"
+            >
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -73,6 +77,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  aria-required="true"
                 />
               </div>
               <div className="space-y-2">
@@ -83,25 +88,43 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  aria-required="true"
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={loading}>
+              {error && (
+                <p
+                  className="text-sm text-red-500"
+                  role="alert"
+                  id="login-error"
+                >
+                  {error}
+                </p>
+              )}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={loading}
+                aria-busy={loading}
+              >
                 {loading ? "Logging in..." : "Login"}
               </Button>
               <p className="text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <Link to="/signup" className="hover:underline">
+                <Link
+                  to="/signup"
+                  className="hover:underline"
+                  aria-label="Sign up for a new account"
+                >
                   Sign up
                 </Link>
               </p>
             </form>
           </CardContent>
         </Card>
-        <div className="absolute bottom-4 left-4 text-xs text-muted-foreground">
+        <footer className="absolute bottom-4 left-4 text-xs text-muted-foreground">
           © {new Date().getFullYear()} SHIELD. All rights reserved.
-        </div>
-      </div>
+        </footer>
+      </main>
     </>
   );
 }

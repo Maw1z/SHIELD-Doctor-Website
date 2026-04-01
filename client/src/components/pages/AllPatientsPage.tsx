@@ -11,12 +11,18 @@ export default function AllPatientsPage() {
   return (
     <>
       <GradientWrapper />
-      <div className="h-screen flex flex-col p-4 sm:p-6 lg:p-8 overflow-hidden font-poppins">
+      <main className="h-screen flex flex-col p-4 sm:p-6 lg:p-8 overflow-hidden font-poppins">
         <div className="mx-auto w-full max-w-7xl flex flex-col h-full">
           <Header />
-          <Card className="flex-1 min-h-0 flex flex-col">
+          <Card
+            className="flex-1 min-h-0 flex flex-col"
+            role="region"
+            aria-labelledby="all-patients-title"
+          >
             <CardHeader>
-              <CardTitle className="text-3xl">All Patients</CardTitle>
+              <CardTitle id="all-patients-title" className="text-3xl">
+                All Patients
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex-1 min-h-0 overflow-hidden pb-2">
               <CustomPatientTable
@@ -28,7 +34,7 @@ export default function AllPatientsPage() {
             </CardContent>
           </Card>
         </div>
-      </div>
+      </main>
     </>
   );
 }

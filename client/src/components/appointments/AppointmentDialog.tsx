@@ -106,12 +106,16 @@ export function AppointmentDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[95vw] sm:max-w-md overflow-y-auto max-h-[90vh]">
-        <form onSubmit={handleSubmit}>
+        <form
+          onSubmit={handleSubmit}
+          aria-labelledby="dialog-title"
+          aria-describedby="dialog-description"
+        >
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold">
+            <DialogTitle id="dialog-title" className="text-xl font-bold">
               New Appointment
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription id="dialog-description">
               Select a patient and schedule their visit.
             </DialogDescription>
           </DialogHeader>
@@ -128,6 +132,7 @@ export function AppointmentDialog({
                   setFormData({ ...formData, title: e.target.value })
                 }
                 required
+                aria-required="true"
               />
             </div>
 
@@ -139,7 +144,14 @@ export function AppointmentDialog({
                 }
                 value={formData.patient_id}
               >
-                <SelectTrigger className="w-full text-base" id="patient">
+                <SelectTrigger
+                  className="w-full text-base"
+                  id="patient"
+                  aria-required="true"
+                  aria-label={
+                    isPatientsLoading ? "Loading patients" : "Select a patient"
+                  }
+                >
                   <SelectValue
                     placeholder={
                       isPatientsLoading ? "Loading..." : "Select a patient"
@@ -158,7 +170,7 @@ export function AppointmentDialog({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>Date</Label>
+                <Label id="date-label">Date</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -167,8 +179,13 @@ export function AppointmentDialog({
                         "w-full justify-start text-left font-normal text-base sm:text-sm",
                         !date && "text-muted-foreground",
                       )}
+                      aria-labelledby="date-label"
+                      aria-haspopup="dialog"
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                      <CalendarIcon
+                        className="mr-2 h-4 w-4 shrink-0"
+                        aria-hidden="true"
+                      />
                       <span className="truncate">
                         {date ? format(date, "PPP") : "Pick a date"}
                       </span>
@@ -197,6 +214,7 @@ export function AppointmentDialog({
                   value={time}
                   onChange={(e) => setTime(e.target.value)}
                   required
+                  aria-required="true"
                 />
               </div>
             </div>
@@ -216,9 +234,13 @@ export function AppointmentDialog({
               type="submit"
               disabled={isSubmitting || isPatientsLoading}
               className="w-full sm:w-auto"
+              aria-busy={isSubmitting}
             >
               {isSubmitting && (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2
+                  className="mr-2 h-4 w-4 animate-spin"
+                  aria-hidden="true"
+                />
               )}
               Save Appointment
             </Button>

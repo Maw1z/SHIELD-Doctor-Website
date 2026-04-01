@@ -98,13 +98,18 @@ export default function PatientDetailsPage() {
     <div className="relative min-h-screen w-full">
       <GradientWrapper />
 
-      <div className="relative z-10 flex flex-col p-4 sm:p-6 lg:p-8 font-poppins text-slate-900">
+      <main className="relative z-10 flex flex-col p-4 sm:p-6 lg:p-8 font-poppins text-slate-900">
         <div className="mx-auto w-full max-w-7xl flex flex-col gap-6">
           <Header />
 
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="icon" onClick={() => navigate(-1)}>
-              <ArrowLeft className="h-4 w-4" />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate(-1)}
+              aria-label="Go back to previous page"
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             </Button>
             <h1 className="text-3xl font-bold tracking-tight">
               Patient Profile
@@ -112,30 +117,46 @@ export default function PatientDetailsPage() {
           </div>
 
           {/* Patient Details */}
-          <Card className="w-full shadow-sm">
-            <CardHeader className="border-b">
-              <CardTitle className="flex items-center gap-2">
-                <Contact2 className="h-5 w-5 text-primary" />
-                Personal Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col md:flex-row items-center justify-start gap-6 md:gap-12">
-              <PatientDetails patient={patient} />
-            </CardContent>
-          </Card>
+          <section aria-labelledby="personal-info-title">
+            <Card className="w-full shadow-sm">
+              <CardHeader className="border-b">
+                <CardTitle
+                  id="personal-info-title"
+                  className="flex items-center gap-2"
+                >
+                  <Contact2
+                    className="h-5 w-5 text-primary"
+                    aria-hidden="true"
+                  />
+                  Personal Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-col md:flex-row items-center justify-start gap-6 md:gap-12">
+                <PatientDetails patient={patient} />
+              </CardContent>
+            </Card>
+          </section>
 
           {/* Physical Biometrics */}
-          <Card className="w-full shadow-sm">
-            <CardHeader className="border-b">
-              <CardTitle className="flex items-center gap-2">
-                <Fingerprint className="h-5 w-5 text-primary" />
-                Physical Biometrics
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <PhysicalBiometrics patient={patient} />
-            </CardContent>
-          </Card>
+          <section aria-labelledby="biometrics-title">
+            <Card className="w-full shadow-sm">
+              <CardHeader className="border-b">
+                <CardTitle
+                  id="biometrics-title"
+                  className="flex items-center gap-2"
+                >
+                  <Fingerprint
+                    className="h-5 w-5 text-primary"
+                    aria-hidden="true"
+                  />
+                  Physical Biometrics
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <PhysicalBiometrics patient={patient} />
+              </CardContent>
+            </Card>
+          </section>
 
           {/* AI Risk Assessment Card */}
           {/* <Card className="w-full shadow-sm">
@@ -153,72 +174,107 @@ export default function PatientDetailsPage() {
           {/* Bottom Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 pb-10">
             {/* Vitals Main Card */}
-            <Card className="lg:col-span-3 flex flex-col h-fit">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-primary" />
-                  Vitals & Trends
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="border-t pt-6">
-                <VitalsAndTrends />
-              </CardContent>
-            </Card>
+            <section className="lg:col-span-3" aria-labelledby="vitals-title">
+              <Card className="flex flex-col h-fit">
+                <CardHeader>
+                  <CardTitle
+                    id="vitals-title"
+                    className="flex items-center gap-2"
+                  >
+                    <Activity
+                      className="h-5 w-5 text-primary"
+                      aria-hidden="true"
+                    />
+                    Vitals & Trends
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="border-t pt-6">
+                  <VitalsAndTrends />
+                </CardContent>
+              </Card>
+            </section>
 
             {/* Sidebar */}
-            <div className="lg:col-span-1 flex flex-col gap-6">
-              <Card>
-                <CardHeader className="border-b">
-                  <CardTitle className="text-xs uppercase flex items-center gap-2 tracking-widest">
-                    <ShieldCheck className="h-5 w-5" /> Monitoring
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <MonitoringStatus
-                    riskScore={patient.risk_score}
-                    lastSeen={patient.last_seen}
-                  />
-                </CardContent>
-              </Card>
+            <aside
+              className="lg:col-span-1 flex flex-col gap-6"
+              aria-label="Patient Status Summary"
+            >
+              <section aria-labelledby="monitoring-title">
+                <Card>
+                  <CardHeader className="border-b">
+                    <CardTitle
+                      id="monitoring-title"
+                      className="text-xs uppercase flex items-center gap-2 tracking-widest"
+                    >
+                      <ShieldCheck className="h-5 w-5" aria-hidden="true" />{" "}
+                      Monitoring
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <MonitoringStatus
+                      riskScore={patient.risk_score}
+                      lastSeen={patient.last_seen}
+                    />
+                  </CardContent>
+                </Card>
+              </section>
 
-              <Card>
-                <CardHeader className="border-b">
-                  <CardTitle className="text-xs uppercase flex items-center gap-2 tracking-widest">
-                    <ShieldAlert className="h-5 w-5" /> Alerts
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <PatientAlerts alerts={patient.alerts} />
-                </CardContent>
-              </Card>
+              <section aria-labelledby="alerts-sidebar-title">
+                <Card>
+                  <CardHeader className="border-b">
+                    <CardTitle
+                      id="alerts-sidebar-title"
+                      className="text-xs uppercase flex items-center gap-2 tracking-widest"
+                    >
+                      <ShieldAlert className="h-5 w-5" aria-hidden="true" />{" "}
+                      Alerts
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <PatientAlerts alerts={patient.alerts} />
+                  </CardContent>
+                </Card>
+              </section>
 
-              <Card>
-                <CardHeader className="border-b">
-                  <CardTitle className="text-xs uppercase flex items-center gap-2 tracking-widest">
-                    <FileText className="h-5 w-5" /> Doctor Notes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-xs">
-                  <DoctorNotes notes={patient.doctor_notes} />
-                </CardContent>
-              </Card>
+              <section aria-labelledby="notes-title">
+                <Card>
+                  <CardHeader className="border-b">
+                    <CardTitle
+                      id="notes-title"
+                      className="text-xs uppercase flex items-center gap-2 tracking-widest"
+                    >
+                      <FileText className="h-5 w-5" aria-hidden="true" /> Doctor
+                      Notes
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-xs">
+                    <DoctorNotes notes={patient.doctor_notes} />
+                  </CardContent>
+                </Card>
+              </section>
 
-              <Card>
-                <CardHeader className="border-b">
-                  <CardTitle className="text-xs uppercase flex items-center gap-2 tracking-widest">
-                    <CalendarDays className="h-4 w-4" /> Upcoming Appointments
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <UpcomingAppointments
-                    appointments={patient.upcoming_appointments}
-                  />
-                </CardContent>
-              </Card>
-            </div>
+              <section aria-labelledby="upcoming-appointments-title">
+                <Card>
+                  <CardHeader className="border-b">
+                    <CardTitle
+                      id="upcoming-appointments-title"
+                      className="text-xs uppercase flex items-center gap-2 tracking-widest"
+                    >
+                      <CalendarDays className="h-4 w-4" aria-hidden="true" />{" "}
+                      Upcoming Appointments
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <UpcomingAppointments
+                      appointments={patient.upcoming_appointments}
+                    />
+                  </CardContent>
+                </Card>
+              </section>
+            </aside>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

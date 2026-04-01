@@ -48,33 +48,52 @@ export function SpO2Chart({ vitals, timeRange, onRangeChange }: any) {
   }, [vitals, timeRange]);
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm" role="region" aria-label="SpO2 Chart Card">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Waves className="h-8 w-8 text-blue-600" />
+            <Waves className="h-8 w-8 text-blue-600" aria-hidden="true" />
             <CardTitle className="text-lg font-semibold">SpO₂</CardTitle>
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold">{average}%</p>
-            <p className="text-[10px] text-muted-foreground uppercase">avg</p>
+          <div className="text-right" aria-live="polite" aria-atomic="true">
+            <p className="text-2xl font-bold">
+              <span className="sr-only">Average Oxygen Saturation: </span>
+              {average}%
+            </p>
+            <p
+              className="text-[10px] text-muted-foreground uppercase"
+              aria-hidden="true"
+            >
+              avg
+            </p>
           </div>
         </div>
       </CardHeader>
       <CardContent className="pb-4">
-        <div className="flex gap-1 mb-4 overflow-x-auto pb-1 no-scrollbar">
+        <div
+          className="flex gap-1 mb-4 overflow-x-auto pb-1 no-scrollbar"
+          role="tablist"
+          aria-label="Select time range"
+        >
           {["1H", "6H", "12H", "24H", "7D", "4W", "6M", "1Y"].map((r) => (
             <button
               key={r}
               onClick={() => onRangeChange(r)}
+              role="tab"
+              aria-selected={timeRange === r}
               className={`px-2 py-1 text-[9px] font-bold rounded ${timeRange === r ? "bg-blue-600 text-white" : "bg-slate-100"}`}
             >
               {r}
             </button>
           ))}
         </div>
-        <ChartContainer config={chartConfig} className="h-30 w-full">
-          <LineChart data={chartData}>
+        <ChartContainer
+          config={chartConfig}
+          className="h-30 w-full"
+          role="img"
+          aria-label={`Line chart showing blood oxygen saturation trends over ${timeRange}. Current average is ${average} percent.`}
+        >
+          <LineChart data={chartData} accessibilityLayer>
             <CartesianGrid vertical={false} strokeDasharray="3 3" />
             <XAxis
               dataKey="time"
@@ -97,6 +116,7 @@ export function SpO2Chart({ vitals, timeRange, onRangeChange }: any) {
             />
             <YAxis domain={[90, 100]} hide />
             <ChartTooltip
+              cursor={false}
               content={
                 <ChartTooltipContent
                   labelFormatter={(value) => {
@@ -116,6 +136,7 @@ export function SpO2Chart({ vitals, timeRange, onRangeChange }: any) {
               stroke="var(--color-spo2)"
               strokeWidth={2}
               dot={false}
+              isAnimationActive={false}
             />
           </LineChart>
         </ChartContainer>

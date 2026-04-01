@@ -16,8 +16,11 @@ export default function MonitoringStatus({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between border-b pb-2">
-        <span className="text-xs font-semibold">Status:</span>
+        <span className="text-xs font-semibold" id="status-label">
+          Status:
+        </span>
         <span
+          aria-labelledby="status-label"
           className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
             status === "Stable"
               ? "bg-green-100 text-green-700"
@@ -30,9 +33,14 @@ export default function MonitoringStatus({
         </span>
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold">Last Seen:</span>
-        <div className="flex items-center gap-1 text-xs text-slate-500">
-          <Clock className="h-3 w-3" />
+        <span className="text-xs font-semibold" id="last-seen-label">
+          Last Seen:
+        </span>
+        <div
+          className="flex items-center gap-1 text-xs text-slate-500"
+          aria-labelledby="last-seen-label"
+        >
+          <Clock className="h-3 w-3" aria-hidden="true" />
           {lastSeen ? formatDateTime(lastSeen) : "No past visits"}
         </div>
       </div>

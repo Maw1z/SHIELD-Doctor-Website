@@ -8,35 +8,46 @@ interface Note {
 export default function DoctorNotes({ notes }: { notes: Note[] }) {
   if (!notes || notes.length === 0) {
     return (
-      <p className="text-slate-400 italic">
+      <p className="text-slate-400 italic" role="status">
         No notes recorded for this patient.
       </p>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div
+      className="flex flex-col gap-4"
+      role="feed"
+      aria-busy="false"
+      aria-label="Doctor notes feed"
+    >
       {notes.map((note) => (
-        <div
+        <article
           key={note.note_id}
           className="border-b last:border-0 pb-3 last:pb-0"
+          aria-labelledby={`note-title-${note.note_id}`}
         >
-          <p className="font-bold text-primary text-[11px] uppercase tracking-tight mb-1">
+          <p
+            id={`note-title-${note.note_id}`}
+            className="font-bold text-primary text-[11px] uppercase tracking-tight mb-1"
+          >
             {note.note_title || "General Note"}
           </p>
           <p className="text-slate-700 leading-relaxed mb-1">
             {note.note_content}
           </p>
           <p className="text-muted-foreground text-[11px]">
-            {new Date(note.created_at).toLocaleDateString(undefined, {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            })}
+            <time dateTime={note.created_at}>
+              {new Date(note.created_at).toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </time>
           </p>
-        </div>
+        </article>
       ))}
     </div>
   );

@@ -34,32 +34,41 @@ const alertConfig = {
 export default function PatientAlerts({ alerts }: { alerts: PatientAlert[] }) {
   if (!alerts || alerts.length === 0) {
     return (
-      <p className="text-xs text-slate-400 italic">
+      <p className="text-xs text-slate-400 italic" role="status">
         No alerts recorded for this patient.
       </p>
     );
   }
 
   return (
-    <div className="h-90 overflow-y-auto pr-2 space-y-4">
+    <div
+      className="h-90 overflow-y-auto pr-2 space-y-4"
+      role="feed"
+      aria-label="Patient alerts history"
+    >
       {alerts.map((alert) => {
         const config = alertConfig[alert.alert_type];
         const Icon = config.icon;
 
         return (
-          <div
+          <article
             key={alert.alert_id}
             className="bg-white border rounded-md p-4 shadow-sm"
+            aria-labelledby={`alert-type-${alert.alert_id}`}
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <div
                   className={`flex items-center justify-center w-8 h-8 rounded-full ${config.bg}`}
+                  aria-hidden="true"
                 >
                   <Icon className={`h-4 w-4 ${config.text}`} />
                 </div>
-                <p className={`text-sm font-semibold ${config.text}`}>
+                <p
+                  id={`alert-type-${alert.alert_id}`}
+                  className={`text-sm font-semibold ${config.text}`}
+                >
                   {config.label}
                 </p>
               </div>
@@ -90,18 +99,20 @@ export default function PatientAlerts({ alerts }: { alerts: PatientAlert[] }) {
             </div>
 
             <div className="mt-3 text-[11px] text-slate-500">
-              {new Date(alert.triggered_at).toLocaleDateString(undefined, {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })}{" "}
-              •{" "}
-              {new Date(alert.triggered_at).toLocaleTimeString([], {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              <time dateTime={alert.triggered_at}>
+                {new Date(alert.triggered_at).toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}{" "}
+                •{" "}
+                {new Date(alert.triggered_at).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </time>
             </div>
-          </div>
+          </article>
         );
       })}
     </div>

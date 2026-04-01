@@ -73,8 +73,15 @@ export function CustomPatientTable({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-48 border rounded-md">
-        <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+      <div
+        className="flex items-center justify-center h-48 border rounded-md"
+        role="status"
+        aria-busy="true"
+      >
+        <Loader2
+          className="h-6 w-6 animate-spin text-primary mr-2"
+          aria-hidden="true"
+        />
         <p>Fetching Patients..</p>
       </div>
     );
@@ -82,16 +89,19 @@ export function CustomPatientTable({
 
   return (
     <div className="flex flex-col h-full space-y-3 sm:space-y-4">
-      <Input
-        placeholder="Search patients..."
-        value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-        onChange={(e) =>
-          table.getColumn("name")?.setFilterValue(e.target.value)
-        }
-        className="w-full text-sm sm:text-base shrink-0"
-      />
+      <div className="relative">
+        <Input
+          placeholder="Search patients..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(e) =>
+            table.getColumn("name")?.setFilterValue(e.target.value)
+          }
+          className="w-full text-sm sm:text-base shrink-0"
+          aria-label="Search patients by name"
+        />
+      </div>
       <div className="rounded-md border flex-1 overflow-auto min-h-0">
-        <Table>
+        <Table aria-label="Patient list">
           <TableHeader className="sticky top-0 bg-white z-10 shadow-sm">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -99,6 +109,13 @@ export function CustomPatientTable({
                   <TableHead
                     key={header.id}
                     className="text-xs sm:text-sm whitespace-nowrap"
+                    aria-sort={
+                      header.column.getIsSorted() === "asc"
+                        ? "ascending"
+                        : header.column.getIsSorted() === "desc"
+                          ? "descending"
+                          : "none"
+                    }
                   >
                     {flexRender(
                       header.column.columnDef.header,
@@ -115,6 +132,7 @@ export function CustomPatientTable({
                 <TableCell
                   colSpan={columns.length}
                   className="h-20 sm:h-24 text-center text-red-500 text-xs sm:text-sm"
+                  role="alert"
                 >
                   {error}
                 </TableCell>
@@ -140,6 +158,7 @@ export function CustomPatientTable({
                 <TableCell
                   colSpan={columns.length}
                   className="h-20 sm:h-24 text-center text-xs sm:text-sm"
+                  role="status"
                 >
                   No patients found.
                 </TableCell>
