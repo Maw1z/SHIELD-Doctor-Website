@@ -41,23 +41,6 @@ By consolidating patient data into a single ecosystem, SHIELD eliminates fragmen
 
 SHIELD uses a client-server architecture with clear separation of concerns:
 
-```
-Patient/Doctor Request
-         ↓
-React Frontend (TypeScript)
-    ↓        ↓        ↓
-  Auth    Data    Vitals
-       ↓
-  REST API Layer (Flask)
-    ↓        ↓        ↓
-  Auth    Patient  Vitals
-  Routes  Routes   Routes
-       ↓
-  PostgreSQL Database
-       ↓
-Firebase Authentication
-```
-
 ### Architecture Diagram
 ![System Architecture Diagram](./docs/images/architecture.png)
 
@@ -119,9 +102,6 @@ Firebase Authentication
 **Appointment Management**: A patient calls to schedule a follow-up. The doctor navigates the calendar, checks the patient's recent vitals to determine appropriate timing, and books the appointment. The system automatically sends confirmation details to the patient.
 
 **Post-Discharge Follow-Up**: After hospitalization, a patient returns home. The doctor monitors their vital signs remotely. If concerning trends appear, an alert triggers automatically, prompting early intervention before the patient deteriorates.
-
-### User Workflows
-![Clinical Workflow Example](./docs/images/workflow.png)
 
 ---
 
