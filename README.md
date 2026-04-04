@@ -15,7 +15,9 @@ The system is composed of two core components:
 By consolidating patient data into a single ecosystem, SHIELD eliminates fragmented workflows and **enables continuous, real-time healthcare monitoring**.
 
 ### Dashboard Overview
-![SHIELD Dashboard](./docs/images/dashboard.png)
+<img width="1920" height="995" alt="image" src="https://github.com/user-attachments/assets/7916c744-2725-4377-874e-09c46962f36b" />
+
+
 
 ---
 
@@ -31,9 +33,14 @@ By consolidating patient data into a single ecosystem, SHIELD eliminates fragmen
 - **Responsive Design**: Full functionality across desktop, tablet, and mobile devices for clinical flexibility
 
 ### Feature Highlights
-![Patient Management](./docs/images/patient-management.png)
-![Vitals Monitoring](./docs/images/vitals-monitoring.png)
-![Appointments](./docs/images/appointments.png)
+> <img width="1920" height="994" alt="image" src="https://github.com/user-attachments/assets/1d3ac768-1665-485d-becc-2f36341a1702" />
+> Patient Management
+
+> <img width="1920" height="995" alt="image" src="https://github.com/user-attachments/assets/eace0b1b-0d2b-4e7c-8da7-8c2f35ebad3b" />
+> Vitals Monitoring
+
+> <img width="1920" height="998" alt="image" src="https://github.com/user-attachments/assets/1b13cebe-bba1-4e59-818c-eca524728c57" />
+> Appointments
 
 ---
 
@@ -42,17 +49,17 @@ By consolidating patient data into a single ecosystem, SHIELD eliminates fragmen
 SHIELD uses a client-server architecture with clear separation of concerns:
 
 ### Architecture Diagram
-![System Architecture Diagram](./docs/images/architecture.png)
+> <img width="831" height="547" alt="image" src="https://github.com/user-attachments/assets/80d1ce64-162a-4383-a219-9b53066e5cf6" />
 
-**Data Flow**: Patient vitals are collected through the companion mobile app, transmitted securely to the backend, and processed by the risk assessment engine. Physicians access real-time insights through this web dashboard.
+- **Data Flow**: Patient vitals are collected through the companion mobile app, transmitted securely to the backend, and processed by the risk assessment engine. Physicians access real-time insights through this web dashboard.
 
-**Frontend (Client)**: React application with TypeScript that provides an intuitive physician interface. Uses Recharts for vital sign visualization and TanStack React Table for efficient patient data rendering.
+- **Frontend (Client)**: React application with TypeScript that provides an intuitive physician interface. Uses Recharts for vital sign visualization and TanStack React Table for efficient patient data rendering.
 
-**Backend (Server)**: Flask REST API handling all business logic, database operations, and Firebase authentication verification. Implements request validation, error handling, and CORS security protocols.
+- **Backend (Server)**: Flask REST API handling all business logic, database operations, and Firebase authentication verification. Implements request validation, error handling, and CORS security protocols.
 
-**Database**: PostgreSQL for persistent storage of patient records, vitals, appointments, and alerts with proper indexing for query performance.
+- **Database**: PostgreSQL for persistent storage of patient records, vitals, appointments, and alerts with proper indexing for query performance.
 
-**Authentication**: Firebase Authentication for secure doctor login/signup with token-based session management.
+- **Authentication**: Firebase Authentication for secure doctor login/signup with token-based session management.
 
 ---
 
