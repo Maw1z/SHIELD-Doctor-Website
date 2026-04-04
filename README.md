@@ -1,14 +1,18 @@
 # SHIELD: Doctor Healthcare Management Platform
 
-A comprehensive healthcare management system designed for physicians to monitor patient wellness, manage appointments, and assess clinical risks in real time.
+A full-stack healthcare system consisting of a **doctor-facing web platform** and a **patient-facing mobile application**, designed to enable real-time monitoring, data-driven clinical decisions, and seamless patient–doctor interaction.
 
 ---
 
 ## Overview
 
-SHIELD is a full-stack web application that streamlines clinical workflows for medical practitioners. It provides physicians with an integrated platform to manage patient information, track vital signs, schedule appointments, and receive intelligent alerts for patients at risk. The system bridges the gap between scattered patient records and actionable clinical insights, enabling doctors to make faster, more informed care decisions.
+SHIELD is an integrated healthcare solution that bridges the gap between **patient-generated health data and clinical decision-making**.
 
-The platform addresses a critical pain point in modern healthcare: fragmented patient data. By consolidating patient vitals, medical history, appointment scheduling, and risk assessments in a single interface, SHIELD eliminates administrative friction and enables doctors to focus on patient outcomes.
+The system is composed of two core components:
+- **Doctor Web Platform**: A centralized dashboard that allows physicians to manage patient records, monitor vitals, assess risk, and handle appointments.
+- **Patient Mobile Application**: A companion app used by patients to record and submit their vital signs, which are securely transmitted to the backend.
+
+By consolidating patient data into a single ecosystem, SHIELD eliminates fragmented workflows and **enables continuous, real-time healthcare monitoring**.
 
 ### Dashboard Overview
 ![SHIELD Dashboard](./docs/images/dashboard.png)
@@ -57,7 +61,7 @@ Firebase Authentication
 ### Architecture Diagram
 ![System Architecture Diagram](./docs/images/architecture.png)
 
-**Data Flow**: Patient vitals are collected through the companion mobile app (in a separate repository)[link to repo], transmitted securely to the backend, and processed by the risk assessment engine. Physicians access real-time insights through this web dashboard.
+**Data Flow**: Patient vitals are collected through the companion mobile app, transmitted securely to the backend, and processed by the risk assessment engine. Physicians access real-time insights through this web dashboard.
 
 **Frontend (Client)**: React application with TypeScript that provides an intuitive physician interface. Uses Recharts for vital sign visualization and TanStack React Table for efficient patient data rendering.
 
@@ -110,8 +114,6 @@ Firebase Authentication
 
 ## Use Cases
 
-**Daily Clinical Rounds**: A physician starts their day by viewing their patient dashboard. High-risk patients are highlighted with alert flags, allowing the doctor to prioritize which patients to review first. They click into each patient to see recent vital trends and doctor notes from previous visits.
-
 **Remote Patient Monitoring**: A patient with chronic hypertension logs home blood pressure readings through a companion app. The doctor receives an alert when readings exceed threshold parameters and can adjust medication or schedule a follow-up appointment directly from the platform.
 
 **Appointment Management**: A patient calls to schedule a follow-up. The doctor navigates the calendar, checks the patient's recent vitals to determine appropriate timing, and books the appointment. The system automatically sends confirmation details to the patient.
@@ -129,35 +131,6 @@ Firebase Authentication
 
 ---
 
-## Project Structure
-
-
-```
-SHIELD-Doctor-Website/
-├── client/                      # React + TypeScript frontend
-│   ├── src/
-│   │   ├── components/          # Reusable UI components
-│   │   │   ├── pages/          # Full-page views
-│   │   │   ├── patient_details/ # Patient detail components
-│   │   │   ├── appointments/    # Appointment UI
-│   │   │   └── ui/             # Design system (Radix + Tailwind)
-│   │   ├── hooks/              # Custom React hooks (usePatients, useVitals, etc.)
-│   │   ├── api/                # Axios API client
-│   │   └── firebase/           # Firebase configuration
-│   └── vite.config.ts          # Build configuration
-│
-├── server/                      # Flask backend
-│   ├── routes/                  # API endpoint definitions
-│   ├── controllers/             # Business logic
-│   ├── app/
-│   │   ├── db.py               # Database initialization
-│   │   └── __init__.py         # Flask app factory
-│   ├── server.py               # Entry point
-│   └── requirements.txt        # Python dependencies
-```
-
----
-
 ## Future Improvements
 
 **Telemedicine Integration**: Add video consultation capabilities directly within the patient portal for remote appointments and follow-ups.
@@ -170,11 +143,6 @@ SHIELD-Doctor-Website/
 
 **Audit Logging**: Enhanced compliance logging for HIPAA audits tracking all data access and modifications.
 
----
-
-## Contributors
-
-This project was developed as a capstone initiative [Edit Needed]
 ---
 
 ## License
