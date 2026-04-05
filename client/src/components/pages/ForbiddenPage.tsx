@@ -12,34 +12,41 @@ import GradientWrapper from "../GradientWrapper";
 
 const ForbiddenPage = () => {
   return (
-    <div className="flex h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center p-6">
       <GradientWrapper />
-      <main>
+      <main className="w-full max-w-md">
         <Card
-          className="w-full max-w-md border-destructive/50 text-center"
+          className="border-destructive/20 text-center shadow-lg"
           role="alert"
           aria-labelledby="forbidden-title"
           aria-describedby="forbidden-description"
         >
-          <CardHeader>
-            <div className="flex justify-center pb-4">
-              <ShieldAlert
-                className="h-12 w-12 text-destructive"
-                aria-hidden="true"
-              />
+          <CardHeader className="space-y-6 pt-10">
+            <div className="flex justify-center">
+              <div className="rounded-full bg-destructive/10 p-4">
+                <ShieldAlert
+                  className="h-16 w-16 text-destructive"
+                  aria-hidden="true"
+                />
+              </div>
             </div>
-            <CardTitle
-              id="forbidden-title"
-              className="text-4xl font-bold text-destructive"
-            >
-              403 Forbidden
-            </CardTitle>
-            <CardDescription id="forbidden-description" className="text-lg">
-              Access Denied. You do not have permission to view this resource.
-            </CardDescription>
+            <div className="space-y-2">
+              <CardTitle
+                id="forbidden-title"
+                className="text-4xl font-bold tracking-tight text-destructive"
+              >
+                403 Forbidden
+              </CardTitle>
+              <CardDescription
+                id="forbidden-description"
+                className="text-lg px-4"
+              >
+                Access Denied. You do not have permission to view this resource.
+              </CardDescription>
+            </div>
           </CardHeader>
-          <CardFooter className="flex justify-center">
-            <Button variant="outline" asChild>
+          <CardFooter className="flex justify-center pb-10 pt-4">
+            <Button variant="default" asChild size="lg" className="px-8">
               <Link to="/home" aria-label="Go back to the home page">
                 Go Back Home
               </Link>

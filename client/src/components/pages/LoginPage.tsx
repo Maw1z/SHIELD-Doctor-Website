@@ -48,7 +48,7 @@ export default function LoginPage() {
     <>
       <GradientWrapper />
       <main className="min-h-screen font-poppins flex flex-col items-center justify-center px-4">
-        <div className="mb-2">
+        <div className="mb-4">
           <img
             src="/images/ShieldHorizontal.svg"
             alt="Shield Logo"

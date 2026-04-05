@@ -12,31 +12,41 @@ import GradientWrapper from "../GradientWrapper";
 
 const NotFoundPage = () => {
   return (
-    <div className="flex h-screen items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center p-6">
       <GradientWrapper />
-      <main>
+      <main className="w-full max-w-md">
         <Card
-          className="w-full max-w-md text-center"
+          className="text-center shadow-lg"
           role="alert"
           aria-labelledby="not-found-title"
           aria-describedby="not-found-description"
         >
-          <CardHeader>
-            <div className="flex justify-center pb-4">
-              <FileQuestion
-                className="h-12 w-12 text-muted-foreground"
-                aria-hidden="true"
-              />
+          <CardHeader className="space-y-6 pt-10">
+            <div className="flex justify-center">
+              <div className="rounded-full bg-muted p-4">
+                <FileQuestion
+                  className="h-16 w-16 text-muted-foreground"
+                  aria-hidden="true"
+                />
+              </div>
             </div>
-            <CardTitle id="not-found-title" className="text-4xl font-bold">
-              404 Not Found
-            </CardTitle>
-            <CardDescription id="not-found-description" className="text-lg">
-              The page you are looking for does not exist.
-            </CardDescription>
+            <div className="space-y-2">
+              <CardTitle
+                id="not-found-title"
+                className="text-4xl font-bold tracking-tight"
+              >
+                404 Not Found
+              </CardTitle>
+              <CardDescription
+                id="not-found-description"
+                className="text-lg px-4"
+              >
+                The page you are looking for does not exist or has been moved.
+              </CardDescription>
+            </div>
           </CardHeader>
-          <CardFooter className="flex justify-center">
-            <Button asChild>
+          <CardFooter className="flex justify-center pb-10 pt-4">
+            <Button asChild size="lg" className="px-8">
               <Link to="/home" aria-label="Return to the home page">
                 Return Home
               </Link>

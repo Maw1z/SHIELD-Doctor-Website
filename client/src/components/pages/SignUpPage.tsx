@@ -6,7 +6,7 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { deleteUser } from "firebase/auth";
 import { getFriendlyAuthError } from "@/lib/auth-errors";
 
-import PhoneInput from "react-phone-number-input";
+import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 
 import {
@@ -74,6 +74,11 @@ export default function SignUpPage() {
       return;
     }
 
+    if (!phone || !isValidPhoneNumber(phone)) {
+      setError("Please enter a valid phone number");
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -132,7 +137,7 @@ export default function SignUpPage() {
     <>
       <GradientWrapper />
       <main className="min-h-screen font-poppins flex flex-col items-center justify-center px-4">
-        <div className="mb-2">
+        <div className="mb-4">
           <img
             src="/images/ShieldHorizontal.svg"
             alt="Shield Logo"
