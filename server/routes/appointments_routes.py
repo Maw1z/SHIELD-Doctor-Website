@@ -7,14 +7,14 @@ from controllers.appointments_controller import (
 
 appointments_bp = Blueprint('appointments', __name__)
 
-@appointments_bp.route('/api/v1/appointments', methods=['GET'])
+@appointments_bp.route('/appointments', methods=['GET'])
 def get_all_appointments():
     return get_appointments()
 
-@appointments_bp.route('/api/v1/appointments-patient', methods=['GET'])
+@appointments_bp.route('/appointments-patient', methods=['GET'])
 def get_patient_appointments():
     return get_appointments_patient()
 
-@appointments_bp.route('/api/v1/appointments', methods=['POST'])
+@appointments_bp.route('/appointments', methods=['POST'])
 def post_appointment():
     return create_appointment()

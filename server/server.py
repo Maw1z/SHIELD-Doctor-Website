@@ -37,13 +37,13 @@ def initialize_firebase():
 
 initialize_firebase()
 
-app.register_blueprint(patient_bp)
-app.register_blueprint(vitals_bp)
-app.register_blueprint(risk_bp)
-app.register_blueprint(appointments_bp)
-app.register_blueprint(doctors_bp)
-app.register_blueprint(sos_bp)
-app.register_blueprint(alerts_bp)
+app.register_blueprint(patient_bp, url_prefix='/api/v1')
+app.register_blueprint(vitals_bp, url_prefix='/api/v1')
+app.register_blueprint(risk_bp, url_prefix='/api/v1')
+app.register_blueprint(appointments_bp, url_prefix='/api/v1')
+app.register_blueprint(doctors_bp, url_prefix='/api/v1')
+app.register_blueprint(sos_bp, url_prefix='/api/v1')
+app.register_blueprint(alerts_bp, url_prefix='/api/v1')
 
 @app.route('/')
 def home():

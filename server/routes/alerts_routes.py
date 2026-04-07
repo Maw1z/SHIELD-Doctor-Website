@@ -6,10 +6,10 @@ from controllers.alerts_controller import (
 
 alerts_bp = Blueprint('alerts', __name__)
 
-@alerts_bp.route('/api/v1/alerts', methods=['GET'])
+@alerts_bp.route('/alerts', methods=['GET'])
 def get_alerts():
     return get_alerts_for_doctor()
 
-@alerts_bp.route('/api/v1/alerts', methods=['POST'])
+@alerts_bp.route('/alerts', methods=['POST'])
 def post_alerts():
     return log_alerts()
