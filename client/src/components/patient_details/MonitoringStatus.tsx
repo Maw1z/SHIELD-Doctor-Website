@@ -1,9 +1,8 @@
 import { Clock } from "lucide-react";
-import { getStatusFromScore } from "@/utils/getStatusFromScore";
 import { formatDateTime } from "@/utils/formatDateTime";
 
 interface MonitoringProps {
-  riskScore: number;
+  riskScore?: number;
   lastSeen: string | null;
   riskLabel: string;
 }
@@ -12,7 +11,7 @@ export default function MonitoringStatus({
   lastSeen,
   riskLabel,
 }: MonitoringProps) {
-  const status = riskLabel;
+  const status = riskLabel || "Stable";
 
   return (
     <div className="space-y-3">
@@ -28,7 +27,7 @@ export default function MonitoringStatus({
               : status.toLowerCase() === "critical" ||
                   status.toLowerCase() === "high"
                 ? "bg-red-100 text-red-700"
-                : "bg-yellow-100 text-yellow-700" // Defaults to yellow for "Medium"
+                : "bg-yellow-100 text-yellow-700"
           }`}
         >
           {status}
