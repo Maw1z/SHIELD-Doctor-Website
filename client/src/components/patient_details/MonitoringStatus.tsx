@@ -5,13 +5,14 @@ import { formatDateTime } from "@/utils/formatDateTime";
 interface MonitoringProps {
   riskScore: number;
   lastSeen: string | null;
+  riskLabel: string;
 }
 
 export default function MonitoringStatus({
-  riskScore,
   lastSeen,
+  riskLabel,
 }: MonitoringProps) {
-  const status = getStatusFromScore(riskScore || 0);
+  const status = riskLabel;
 
   return (
     <div className="space-y-3">
@@ -22,11 +23,12 @@ export default function MonitoringStatus({
         <span
           aria-labelledby="status-label"
           className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
-            status === "Stable"
+            status.toLowerCase() === "stable" || status.toLowerCase() === "low"
               ? "bg-green-100 text-green-700"
-              : status === "Critical"
+              : status.toLowerCase() === "critical" ||
+                  status.toLowerCase() === "high"
                 ? "bg-red-100 text-red-700"
-                : "bg-yellow-100 text-yellow-700"
+                : "bg-yellow-100 text-yellow-700" // Defaults to yellow for "Medium"
           }`}
         >
           {status}

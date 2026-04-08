@@ -26,7 +26,7 @@ export default function RiskAssessment({ riskData }: { riskData: any }) {
     >
       {/* LEFT SIDE: Radial Chart with Conditional Color */}
       <div
-        className="relative h-32 w-32 shrink-0"
+        className="relative h-24 w-32 shrink-0"
         role="img"
         aria-label={`Risk score chart: ${Math.round(current)}%`}
       >
@@ -58,12 +58,12 @@ export default function RiskAssessment({ riskData }: { riskData: any }) {
           aria-hidden="true"
         >
           <p
-            className="text-2xl font-bold leading-none"
+            className="text-xl font-bold leading-none"
             style={{ color: activeColor }}
           >
             {Math.round(current)}%
           </p>
-          <p className="text-xs font-bold text-muted-foreground uppercase tracking-tighter">
+          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
             Risk Score
           </p>
         </div>

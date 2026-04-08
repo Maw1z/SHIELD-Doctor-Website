@@ -10,12 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
-import { getStatusFromScore } from "@/utils/getStatusFromScore";
 
 const statusColors = {
-  Stable: "bg-green-500",
-  "For Watch": "bg-yellow-500",
-  Critical: "bg-red-500",
+  Low: "bg-green-500",
+  Medium: "bg-yellow-500",
+  High: "bg-red-500",
 };
 
 export const allColumns: ColumnDef<Patient>[] = [
@@ -42,18 +41,19 @@ export const allColumns: ColumnDef<Patient>[] = [
     ),
   },
   {
-    accessorKey: "risk_score",
+    accessorKey: "risk_label",
     id: "status",
     header: "Status",
     sortingFn: "alphanumeric",
     cell: ({ row }) => {
-      const score = row.getValue("status") as number;
-      const status = getStatusFromScore(score);
+      const status = row.getValue("status") as string;
+
       return (
         <div className="flex gap-2 items-center">
           <div
             className={`w-2 h-2 rounded-full ${
-              statusColors[status as keyof typeof statusColors]
+              statusColors[status as keyof typeof statusColors] ||
+              "bg-slate-400"
             }`}
           />
           <span className="text-sm">{status}</span>
@@ -116,7 +116,7 @@ export const allColumns: ColumnDef<Patient>[] = [
 
 export const dashboardColumns: ColumnDef<Patient>[] = [
   allColumns[0], // "name"
-  allColumns[4], // "status" (mapped to risk_score)
+  allColumns[4], // "status"
   allColumns[5], // "lastCheck"
   allColumns[6], // "actions"
 ];
