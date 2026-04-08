@@ -96,19 +96,20 @@ def get_patients_for_doctor():
                 FROM appointments 
                 WHERE patient_id = p.uuid 
                 AND appointment_datetime < NOW() 
-                ORDER BY appointment_datetime DESC LIMIT 1) as last_seen
+                ORDER BY appointment_datetime DESC LIMIT 1) as last_seen,
+                r.risk_label
             FROM patients p
             JOIN doctor_assigned d ON p.uuid = d.patient_id
             LEFT JOIN risk_assessments r ON p.uuid = r.patient_id
             WHERE d.doctor_id = %s
-            ORDER BY p.uuid
+            ORDER BY p.uuid, r.created_at DESC
         """, (doctor_uuid,))
 
         patients = cur.fetchall()
 
     except Exception as e:
-        # global handler deals with it
-        raise e
+        logging.error(f"Error fetching patients: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
     finally:
         if cur:
@@ -135,7 +136,8 @@ def get_patients_for_doctor():
                 "gender": p[5],
                 "phone_number": p[6],
                 "risk_score": p[7],
-                "last_seen": p[8].isoformat() if p[8] else None
+                "last_seen": p[8].isoformat() if p[8] else None,
+                "risk_label": p[9] if p[9] else "Stable" 
             }
             for p in patients
         ]
