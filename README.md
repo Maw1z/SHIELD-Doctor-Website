@@ -174,18 +174,26 @@ Before installing the doctor portal, ensure you have the following installed on 
    ```
 
 5. **Configure environment variables**
-   - Create a `.env` file in the `server` directory
-   - Add the following variables:
+   - Copy the `.env.example` file to `.env` in the `server` directory:
+     ```bash
+     cp .env.example .env
      ```
-     DATABASE_URL=postgresql://user:password@localhost:5432/shield_db
-     FIREBASE_CREDENTIALS_PATH=path/to/firebase/credentials.json
-     SECRET_KEY=your_secret_key_here
+   - Open `.env` and fill in your actual credentials:
      ```
+     PGHOST='your-neon-host.c-3.us-east-1.aws.neon.tech'
+     PGDATABASE='neondb'
+     PGUSER='neondb_owner'
+     PGPASSWORD='your_password'
+     PGSSLMODE='require'
+     PGCHANNELBINDING='require'
+     FIREBASE_SERVICE_ACCOUNT='your_firebase_service_account_json'
+     SECRET_KEY='your_secret_key_here'
+     ```
+   - **Never commit the `.env` file to version control** - it contains sensitive credentials
 
 6. **Set up the PostgreSQL database**
-   ```bash
-   createdb shield_db
-   ```
+   - If using Neon (recommended): Your database is already created in the cloud. Just ensure your `.env` has the correct connection credentials.
+   - If using local PostgreSQL: Run `createdb shield_db`
 
 7. **Run the Flask server**
    ```bash
