@@ -65,7 +65,7 @@ def get_appointments():
 # Create GET appointments and notes (for patient)
 def get_appointments_patient():
     patient_id = request.args.get('patient_id')
-    
+
     if not patient_id:
         return jsonify({"error": "patient_id is required"}), 400
 
@@ -94,8 +94,8 @@ def get_appointments_patient():
                         "doctor_notes": [],
                         "not_registered": True,
                         "message": (
-                            "Sorry, you are not registered to your doctor yet "
-                            "in the system. Please contact the administrator."
+                            "Sorry, you are not registered to a doctor yet "
+                            "in the system. Please contact the administrator if you think is a mistake."
                         ),
                     }
                 ),
