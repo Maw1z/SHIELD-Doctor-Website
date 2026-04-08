@@ -16,7 +16,7 @@ import { auth } from "@/firebase/firebaseConfig";
 import { LoaderCircle } from "lucide-react";
 import GradientWrapper from "./components/GradientWrapper";
 import ForbiddenPage from "./components/pages/ForbiddenPage";
-import { clearLoginTimestamp, isSessionExpired } from "./lib/auth-session";
+import { clearLoginTimestamp, isSessionExpired } from "@/lib/auth-session";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
