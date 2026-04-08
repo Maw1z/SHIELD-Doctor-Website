@@ -1,5 +1,6 @@
 import axios from "axios";
-import { getAuth } from "firebase/auth";
+import { clearLoginTimestamp, isSessionExpired } from "@/lib/auth-session";
+import { getAuth, signOut } from "firebase/auth";
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_PUBLIC_API_BASE_URL,
@@ -8,6 +9,16 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     const auth = getAuth();
+
+    // Check local session before attaching token
+    if (isSessionExpired()) {
+      await signOut(auth);
+      clearLoginTimestamp();
+      // Optionally redirect or force page reload
+      window.location.href = "/login";
+      return Promise.reject("Session Expired");
+    }
+
     const user = auth.currentUser;
 
     if (user) {
@@ -17,9 +28,7 @@ apiClient.interceptors.request.use(
 
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  },
+  (error) => Promise.reject(error),
 );
 
 export default apiClient;

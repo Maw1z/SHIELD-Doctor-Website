@@ -5,6 +5,7 @@ import { auth } from "@/firebase/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { deleteUser } from "firebase/auth";
 import { getFriendlyAuthError } from "@/lib/auth-errors";
+import { saveLoginTimestamp } from "@/lib/auth-session";
 
 import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
@@ -101,18 +102,14 @@ export default function SignUpPage() {
         phone_number: phone,
         email: formData.email,
       });
-      // const response = await axios.post(`${baseUrl}/doctor`, {
-      //   doctor_id: user.uid,
-      //   name: formData.name,
-      //   specialization: formData.specialization,
-      //   phone_number: phone,
-      //   email: formData.email,
-      // });
 
       if (response.status === 201) {
         toast.success("Account created successfully!", {
           description: "Welcome to SHIELD.",
         });
+
+        // Save timestamp after successful signup
+        saveLoginTimestamp();
 
         setTimeout(() => {
           navigate("/home");
