@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig";
 import { getFriendlyAuthError } from "@/lib/auth-errors";
+import { saveLoginTimestamp } from "@/lib/auth-session";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -32,6 +33,10 @@ export default function LoginPage() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
+
+      // Save timestamp after successful login
+      saveLoginTimestamp();
+
       navigate("/home");
 
       toast.success("Logged in successfully!", {

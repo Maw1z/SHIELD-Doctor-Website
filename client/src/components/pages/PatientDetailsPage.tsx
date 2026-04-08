@@ -15,7 +15,7 @@ import {
   Contact2,
   Fingerprint,
   Loader2,
-  // Sparkles,
+  Sparkles,
   ShieldAlert,
 } from "lucide-react";
 
@@ -28,7 +28,7 @@ import MonitoringStatus from "../patient_details/MonitoringStatus";
 import DoctorNotes from "../patient_details/DoctorNotes";
 import UpcomingAppointments from "../patient_details/UpcomingAppointments";
 import PatientNotFoundPage from "./PatientNotFoundPage";
-// import RiskAssessment from "../patient_details/RiskAssessment";
+import RiskAssessment from "../patient_details/RiskAssessment";
 import PatientAlerts from "../patient_details/PatientAlerts";
 
 export default function PatientDetailsPage() {
@@ -158,23 +158,22 @@ export default function PatientDetailsPage() {
             </Card>
           </section>
 
-          {/* AI Risk Assessment Card */}
-          {/* <Card className="w-full shadow-sm">
-            <CardHeader className="border-b">
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5 text-primary" />
-                AI-Driven Risk Assessment
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <RiskAssessment riskData={patient.risk_data} />
-            </CardContent>
-          </Card> */}
-
           {/* Bottom Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 pb-10">
             {/* Vitals Main Card */}
             <section className="lg:col-span-3" aria-labelledby="vitals-title">
+              {/* AI Risk Assessment Card */}
+              <Card className="w-full shadow-sm mb-4">
+                <CardHeader className="border-b">
+                  <CardTitle className="flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    AI-Driven Risk Assessment
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RiskAssessment riskData={patient.risk_data} />
+                </CardContent>
+              </Card>
               <Card className="flex flex-col h-fit">
                 <CardHeader>
                   <CardTitle
@@ -212,8 +211,8 @@ export default function PatientDetailsPage() {
                   </CardHeader>
                   <CardContent>
                     <MonitoringStatus
-                      riskScore={patient.risk_score}
                       lastSeen={patient.last_seen}
+                      riskLabel={patient.risk_label}
                     />
                   </CardContent>
                 </Card>

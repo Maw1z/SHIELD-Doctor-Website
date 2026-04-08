@@ -65,62 +65,108 @@ def get_appointments():
 # Create GET appointments and notes (for patient)
 def get_appointments_patient():
     patient_id = request.args.get('patient_id')
-    
+
     if not patient_id:
         return jsonify({"error": "patient_id is required"}), 400
 
     conn = get_db_connection()
+    cur = None
+
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
 
-        cur.execute("""
-            SELECT 
+        cur.execute(
+            """
+            SELECT 1
+            FROM doctor_assigned
+            WHERE patient_id = %s
+            LIMIT 1
+            """,
+            (patient_id,),
+        )
+        assignment = cur.fetchone()
+
+        if not assignment:
+            return (
+                jsonify(
+                    {
+                        "appointments": [],
+                        "doctor_notes": [],
+                        "not_registered": True,
+                        "message": (
+                            "Sorry, you are not registered to a doctor yet "
+                            "in the system. Please contact the administrator if you think is a mistake."
+                        ),
+                    }
+                ),
+                200,
+            )
+
+        cur.execute(
+            """
+            SELECT
                 a.appointment_id,
                 a.doctor_id,
                 a.title,
                 a.appointment_datetime,
-                d.name as doctor_name,
-                d.specialization as doctor_specialization
+                d.name AS doctor_name,
+                d.specialization AS doctor_specialization
             FROM appointments a
             JOIN doctors d ON a.doctor_id = d.doctor_id
-            WHERE a.patient_id = %s 
+            WHERE a.patient_id = %s
             AND a.appointment_datetime >= NOW()
             ORDER BY a.appointment_datetime ASC
-        """, (patient_id,))
+            """,
+            (patient_id,),
+        )
         appointments = cur.fetchall()
 
-        cur.execute("""
-            SELECT 
+        # Fetch doctor notes
+        cur.execute(
+            """
+            SELECT
                 n.note_id,
                 n.note_title,
                 n.note_content,
                 n.created_at,
-                d.name as doctor_name,
-                d.specialization as doctor_specialization
+                d.name AS doctor_name,
+                d.specialization AS doctor_specialization
             FROM doctor_notes n
             JOIN doctors d ON n.doctor_id = d.doctor_id
             WHERE n.patient_id = %s
             ORDER BY n.created_at DESC
-        """, (patient_id,))
+            """,
+            (patient_id,),
+        )
         notes = cur.fetchall()
 
-        # Clean timestamps for JSON
         for appt in appointments:
-            appt['appointment_datetime'] = appt['appointment_datetime'].isoformat()
-        
-        for note in notes:
-            note['created_at'] = note['created_at'].isoformat()
+            appt["appointment_datetime"] = appt[
+                "appointment_datetime"
+            ].isoformat()
 
-        return jsonify({
-            "appointments": appointments,
-            "doctor_notes": notes
-        }), 200
+        for note in notes:
+            note["created_at"] = note["created_at"].isoformat()
+
+        return (
+            jsonify(
+                {
+                    "appointments": appointments,
+                    "doctor_notes": notes,
+                    "not_registered": False,
+                    "message": None,
+                }
+            ),
+            200,
+        )
 
     except Exception as e:
         logging.error(f"Error fetching patient consultations: {e}")
         return jsonify({"error": "Internal server error"}), 500
+
     finally:
-        cur.close()
+        if cur:
+            cur.close()
         conn.close()
 
 # Create POST appointments

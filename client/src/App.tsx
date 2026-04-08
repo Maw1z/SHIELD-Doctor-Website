@@ -11,19 +11,31 @@ import NotFoundPage from "@/components/pages/NotFoundPage";
 
 import { Toaster } from "@/components/ui/sonner";
 
-import { type User, onAuthStateChanged } from "firebase/auth";
+import { type User, onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/firebase/firebaseConfig";
 import { LoaderCircle } from "lucide-react";
 import GradientWrapper from "./components/GradientWrapper";
 import ForbiddenPage from "./components/pages/ForbiddenPage";
+import { clearLoginTimestamp, isSessionExpired } from "@/lib/auth-session";
 
 function App() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (currentUser) {
+        // Check if session expired
+        if (isSessionExpired()) {
+          await signOut(auth);
+          clearLoginTimestamp();
+          setUser(null);
+        } else {
+          setUser(currentUser);
+        }
+      } else {
+        setUser(null);
+      }
       setLoading(false);
     });
 
@@ -71,7 +83,17 @@ function App() {
         <Route path="/forbidden" element={<ForbiddenPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      <Toaster position="bottom-right" richColors />
+      <Toaster
+        position="bottom-right"
+        richColors
+        toastOptions={{
+          style: {
+            background: "white",
+            color: "#29484C",
+            borderColor: "#29484C",
+          },
+        }}
+      />
     </BrowserRouter>
   );
 }

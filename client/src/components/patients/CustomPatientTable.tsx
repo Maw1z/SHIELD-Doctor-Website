@@ -35,9 +35,9 @@ export function CustomPatientTable({
   isLoading,
   error,
 }: CustomPatientTableProps) {
-  // Setting the initial sorting state to status descending
+  // 1. Initial sorting: 'asc' ensures 0 (High) comes before 3 (Stable)
   const [sorting, setSorting] = useState<SortingState>([
-    { id: "status", desc: true },
+    { id: "status", desc: false },
   ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
@@ -50,17 +50,17 @@ export function CustomPatientTable({
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     state: { sorting, columnFilters },
-    // Custom sorting logic to ensure critical is always first
+    // Custom sorting logic to ensure high is always first
     sortingFns: {
       statusPriority: (rowA, rowB, columnId) => {
         const valA = rowA.getValue(columnId) as string;
         const valB = rowB.getValue(columnId) as string;
 
         const priority: Record<string, number> = {
-          Critical: 0,
-          Urgent: 1,
-          Stable: 2,
-          Pending: 3,
+          High: 0,
+          Medium: 1,
+          Low: 2,
+          Stable: 3,
         };
 
         const aPriority = priority[valA] ?? 99;
