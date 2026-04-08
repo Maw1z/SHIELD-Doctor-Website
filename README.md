@@ -15,7 +15,8 @@ The system is composed of two core components:
 By consolidating patient data into a single ecosystem, SHIELD eliminates fragmented workflows and **enables continuous, real-time healthcare monitoring**.
 
 ### Dashboard Overview
-<img width="1920" height="995" alt="image" src="https://github.com/user-attachments/assets/7916c744-2725-4377-874e-09c46962f36b" />
+<img width="1920" height="996" alt="image" src="https://github.com/user-attachments/assets/1b081b28-2341-4ff5-ba44-d525a0dee22f" />
+
 
 
 
@@ -33,14 +34,15 @@ By consolidating patient data into a single ecosystem, SHIELD eliminates fragmen
 - **Responsive Design**: Full functionality across desktop, tablet, and mobile devices for clinical flexibility
 
 ### Feature Highlights
-> <img width="1920" height="994" alt="image" src="https://github.com/user-attachments/assets/1d3ac768-1665-485d-becc-2f36341a1702" />
 > Patient Management
+> <img width="1920" height="996" alt="image" src="https://github.com/user-attachments/assets/a88196e8-8881-4321-aa3f-a7ed244c66a3" />
 
-> <img width="1920" height="995" alt="image" src="https://github.com/user-attachments/assets/eace0b1b-0d2b-4e7c-8da7-8c2f35ebad3b" />
 > Vitals Monitoring
+> <img width="1920" height="996" alt="image" src="https://github.com/user-attachments/assets/a245a325-8523-4287-a359-8108a5ffd499" />
 
-> <img width="1920" height="998" alt="image" src="https://github.com/user-attachments/assets/1b13cebe-bba1-4e59-818c-eca524728c57" />
 > Appointments
+> <img width="1920" height="995" alt="image" src="https://github.com/user-attachments/assets/2b5681f5-5c07-40f4-8159-05fe7aa739c2" />
+
 
 ---
 
