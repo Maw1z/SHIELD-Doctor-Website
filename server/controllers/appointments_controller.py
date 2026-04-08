@@ -78,15 +78,15 @@ def get_appointments_patient():
         cur.execute(
             """
             SELECT 1
-            FROM patient_doctors
+            FROM doctor_assigned
             WHERE patient_id = %s
             LIMIT 1
             """,
             (patient_id,),
         )
-        registration = cur.fetchone()
+        assignment = cur.fetchone()
 
-        if not registration:
+        if not assignment:
             return (
                 jsonify(
                     {
@@ -114,13 +114,14 @@ def get_appointments_patient():
             FROM appointments a
             JOIN doctors d ON a.doctor_id = d.doctor_id
             WHERE a.patient_id = %s
-              AND a.appointment_datetime >= NOW()
+            AND a.appointment_datetime >= NOW()
             ORDER BY a.appointment_datetime ASC
             """,
             (patient_id,),
         )
         appointments = cur.fetchall()
 
+        # Fetch doctor notes
         cur.execute(
             """
             SELECT
@@ -140,7 +141,9 @@ def get_appointments_patient():
         notes = cur.fetchall()
 
         for appt in appointments:
-            appt["appointment_datetime"] = appt["appointment_datetime"].isoformat()
+            appt["appointment_datetime"] = appt[
+                "appointment_datetime"
+            ].isoformat()
 
         for note in notes:
             note["created_at"] = note["created_at"].isoformat()
@@ -151,6 +154,7 @@ def get_appointments_patient():
                     "appointments": appointments,
                     "doctor_notes": notes,
                     "not_registered": False,
+                    "message": None,
                 }
             ),
             200,
