@@ -34,7 +34,7 @@ const alertConfig = {
   },
   POSSIBLE_IRREGULAR_RHYTHM: {
     icon: AlertCircle,
-    label: "Arrhythmia",
+    label: "Possible Arrhythmia",
     text: "text-amber-600",
     bg: "bg-amber-50",
   },
