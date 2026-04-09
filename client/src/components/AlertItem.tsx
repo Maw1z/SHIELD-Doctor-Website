@@ -1,7 +1,7 @@
 import { AlertCircle, Activity, Heart, CheckCircle } from "lucide-react";
 import { format } from "date-fns";
 
-export type AlertType = "HIGH_HR" | "LOW_HR" | "IRREGULAR_RHYTHM";
+export type AlertType = "HIGH_HR" | "LOW_HR" | "POSSIBLE_IRREGULAR_RHYTHM";
 
 export interface Alert {
   alert_id: number;
@@ -32,7 +32,7 @@ const alertConfig = {
     text: "text-blue-600",
     bg: "bg-blue-50",
   },
-  IRREGULAR_RHYTHM: {
+  POSSIBLE_IRREGULAR_RHYTHM: {
     icon: AlertCircle,
     label: "Arrhythmia",
     text: "text-amber-600",
