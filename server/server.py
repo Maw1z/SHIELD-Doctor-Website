@@ -13,6 +13,7 @@ from routes.appointments_routes import appointments_bp
 from routes.doctors_routes import doctors_bp
 from routes.sos_routes import sos_bp
 from routes.alerts_routes import alerts_bp
+from routes.doctor_notes_routes import notes_bp
 
 load_dotenv()
 
@@ -44,6 +45,7 @@ app.register_blueprint(appointments_bp, url_prefix='/api/v1')
 app.register_blueprint(doctors_bp, url_prefix='/api/v1')
 app.register_blueprint(sos_bp, url_prefix='/api/v1')
 app.register_blueprint(alerts_bp, url_prefix='/api/v1')
+app.register_blueprint(notes_bp, url_prefix='/api/v1')
 
 @app.route('/')
 def home():
