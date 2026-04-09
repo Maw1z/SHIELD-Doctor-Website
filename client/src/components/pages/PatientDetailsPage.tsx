@@ -39,6 +39,28 @@ export default function PatientDetailsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  const fetchPatientData = async () => {
+    if (!id) return;
+    try {
+      const response = await apiClient.get(`/patient`, {
+        params: { uuid: id },
+      });
+
+      setPatient(response.data);
+      setError(false);
+    } catch (err) {
+      console.error("Error fetching patient:", err);
+      const axiosError = err as AxiosError;
+      if (axiosError.response && axiosError.response.status === 403) {
+        navigate("/forbidden");
+        return;
+      }
+      setError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     const auth = getAuth();
 
@@ -50,33 +72,6 @@ export default function PatientDetailsPage() {
         setError(true);
       }
     });
-
-    const fetchPatientData = async () => {
-      if (!id) return;
-      try {
-        setIsLoading(true);
-
-        const response = await apiClient.get(`/patient`, {
-          params: { uuid: id },
-        });
-
-        setPatient(response.data);
-        setError(false);
-      } catch (err) {
-        console.error("Error fetching patient:", err);
-
-        const axiosError = err as AxiosError;
-
-        if (axiosError.response && axiosError.response.status === 403) {
-          navigate("/forbidden");
-          return;
-        }
-
-        setError(true);
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
     return () => unsubscribe();
   }, [id]);
@@ -236,7 +231,7 @@ export default function PatientDetailsPage() {
               </section>
 
               <section aria-labelledby="notes-title">
-                <Card>
+                <Card className="relative">
                   <CardHeader className="border-b">
                     <CardTitle
                       id="notes-title"
@@ -247,7 +242,11 @@ export default function PatientDetailsPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="text-xs">
-                    <DoctorNotes notes={patient.doctor_notes} />
+                    <DoctorNotes
+                      notes={patient.doctor_notes || []}
+                      patientId={patient.uuid}
+                      onNotesChanged={fetchPatientData}
+                    />
                   </CardContent>
                 </Card>
               </section>
