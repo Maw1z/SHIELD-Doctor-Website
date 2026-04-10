@@ -270,4 +270,4 @@ The optimized build will be created in the `client/dist` directory.
 
 ## License
 
-This project is provided for educational and clinical use. All rights reserved.
+This project is licensed under the [MIT License](#license).
