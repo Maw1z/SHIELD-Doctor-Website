@@ -137,14 +137,10 @@ def log_sos_event():
             
         event_id = result['event_id']
         
-        cur.execute("SELECT name, phone_number FROM emergency_contacts WHERE patient_id = %s", (patient_id,))
-        contacts = cur.fetchall()
-        
         conn.commit()
         return jsonify({
             "status": "success", 
             "event_id": event_id,
-            "alerted_contacts": contacts
         }), 201
     except Exception as e:
         if conn: 
