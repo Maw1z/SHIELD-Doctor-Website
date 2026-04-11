@@ -18,6 +18,10 @@ export default function VitalsAndTrends() {
 
   const { vitals, loading } = useVitals(id || "", timeRange);
 
+  if (!loading && vitals?.length === 0) {
+    return <div>No data available for selected range</div>;
+  }
+
   if (loading && (!vitals || vitals.length === 0)) {
     return (
       <div

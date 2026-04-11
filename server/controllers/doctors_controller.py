@@ -14,7 +14,7 @@ def create_doctor():
         id_token = auth_header.split('Bearer ')[1]
         decoded_token = auth.verify_id_token(id_token)
         doctor_id = decoded_token['uid'] 
-    except:
+    except Exception:
         return jsonify({"error": "Invalid token"}), 401
 
     data = request.get_json()
