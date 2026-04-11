@@ -1,4 +1,5 @@
 from flask import json, jsonify, request
+import decimal
 from app.db import get_db_connection
 import logging
 from firebase_admin import auth
@@ -16,42 +17,40 @@ def get_sos_events_for_doctor():
     except Exception:
         return jsonify({"error": "Invalid token"}), 401
 
-    patient_id = request.args.get('patient_id')
-    if not patient_id:
-        return jsonify({"error": "patient_id query parameter is required"}), 400
-
     conn = get_db_connection()
     try:
         cur = conn.cursor(cursor_factory=RealDictCursor)
-        
-        cur.execute("""
-            SELECT 1 FROM doctor_assigned 
-            WHERE doctor_id = %s AND patient_id = %s
-        """, (doctor_uuid, patient_id))
-        
-        if not cur.fetchone():
-            return jsonify({
-                "error": "Forbidden", 
-                "message": "Access denied. You are not assigned to this patient."
-            }), 403
 
         cur.execute("""
             SELECT 
-                event_id, 
-                latitude, 
-                longitude, 
-                vitals_snapshot, 
-                created_at 
-            FROM sos_events 
-            WHERE patient_id = %s 
-            ORDER BY created_at DESC
-        """, (patient_id,))
-        
+                s.event_id, 
+                s.patient_id,
+                p.name as patient_name,
+                s.latitude, 
+                s.longitude, 
+                s.vitals_snapshot, 
+                s.created_at 
+            FROM sos_events s
+            JOIN doctor_assigned da ON s.patient_id = da.patient_id
+            JOIN patients p ON s.patient_id = p.uuid
+            WHERE da.doctor_id = %s
+            ORDER BY s.created_at DESC
+        """), (doctor_uuid)
+
         events = cur.fetchall()
-        
+
+        # Format timestamps and decimals for JSON compatibility
+        for row in events:
+            if row['created_at']:
+                row['created_at'] = row['created_at'].isoformat()
+            if isinstance(row['latitude'], decimal.Decimal):
+                row['latitude'] = float(row['latitude'])
+            if isinstance(row['longitude'], decimal.Decimal):
+                row['longitude'] = float(row['longitude'])
+
         return jsonify({
             "doctor_id": doctor_uuid,
-            "patient_id": patient_id,
+            "total_events": len(events),
             "events": events
         }), 200
 
