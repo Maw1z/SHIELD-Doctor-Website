@@ -151,6 +151,17 @@ def get_patient_by_uuid():
 
         patient['alerts'] = cur.fetchall()
 
+        # Fetch SOS alerts
+        cur.execute("""
+            SELECT 
+                event_id, latitude, longitude, 
+                vitals_snapshot, created_at 
+            FROM sos_events 
+            WHERE patient_id = %s
+            ORDER BY created_at DESC
+        """, (patient_uuid,))
+        patient['sos_events'] = cur.fetchall()
+
         # Fetch Last Seen
         cur.execute("""
             SELECT appointment_datetime 
@@ -227,6 +238,17 @@ def get_patient_by_uuid():
         # Format Alerts
         for alert in patient['alerts']:
             alert['triggered_at'] = alert['triggered_at'].isoformat()
+
+        # Format SOS Events 
+        import decimal
+        for sos in patient['sos_events']:
+            sos['created_at'] = (
+                sos['created_at'].isoformat() if sos['created_at'] else None
+            )
+            if isinstance(sos['latitude'], decimal.Decimal):
+                sos['latitude'] = float(sos['latitude'])
+            if isinstance(sos['longitude'], decimal.Decimal):
+                sos['longitude'] = float(sos['longitude'])
 
         return jsonify(patient), 200
 
