@@ -9,7 +9,7 @@ def get_sos_events_for_doctor():
     auth_header = request.headers.get('Authorization')
     if not auth_header: 
         return jsonify({"error": "Unauthorized"}), 401
-    
+
     try:
         id_token = auth_header.split('Bearer ')[1]
         decoded_token = auth.verify_id_token(id_token)
@@ -35,7 +35,7 @@ def get_sos_events_for_doctor():
             JOIN patients p ON s.patient_id = p.uuid
             WHERE da.doctor_id = %s
             ORDER BY s.created_at DESC
-        """), (doctor_uuid)
+        """, (doctor_uuid,))
 
         events = cur.fetchall()
 
