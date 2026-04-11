@@ -52,7 +52,7 @@ export function useAlerts() {
 
     const interval = setInterval(() => {
       fetchAlerts();
-    }, 30000);
+    }, 3000);
 
     return () => clearInterval(interval);
   }, [currentUid, fetchAlerts]);

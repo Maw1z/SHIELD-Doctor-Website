@@ -30,6 +30,7 @@ import UpcomingAppointments from "../patient_details/UpcomingAppointments";
 import PatientNotFoundPage from "./PatientNotFoundPage";
 import RiskAssessment from "../patient_details/RiskAssessment";
 import PatientAlerts from "../patient_details/PatientAlerts";
+import { useSos } from "@/hooks/useSos";
 
 export default function PatientDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -38,6 +39,8 @@ export default function PatientDetailsPage() {
   const [patient, setPatient] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  const { sosData, isSosLoading } = useSos();
 
   const fetchPatientData = async () => {
     if (!id) return;
@@ -225,7 +228,10 @@ export default function PatientDetailsPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <PatientAlerts alerts={patient.alerts} />
+                    <PatientAlerts
+                      alerts={patient.alerts}
+                      sosEvents={patient.sos_events}
+                    />
                   </CardContent>
                 </Card>
               </section>

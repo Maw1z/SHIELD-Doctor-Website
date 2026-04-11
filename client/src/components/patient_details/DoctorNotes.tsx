@@ -54,70 +54,76 @@ export default function DoctorNotes({
         </Button>
       </div>
 
-      {!notes || notes.length === 0 ? (
-        <p className="text-slate-400 italic" role="status">
-          No notes recorded for this patient.
-        </p>
-      ) : (
-        <div
-          className="flex flex-col gap-4"
-          role="feed"
-          aria-busy="false"
-          aria-label="Doctor notes feed"
-        >
-          {notes.map((note) => (
-            <article
-              key={note.note_id}
-              className="border-b last:border-0 pb-3 last:pb-0"
-              aria-labelledby={`note-title-${note.note_id}`}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <p
-                  id={`note-title-${note.note_id}`}
-                  className="font-bold text-primary text-[11px] uppercase tracking-tight mb-1"
-                >
-                  {note.note_title || "General Note"}
-                </p>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                    onClick={() => handleEdit(note)}
-                    aria-label={`Edit note: ${note.note_title || "General Note"}`}
+      <div
+        className="h-84 overflow-y-auto pr-2"
+        role="feed"
+        aria-busy="false"
+        aria-label="Doctor notes feed"
+      >
+        {!notes || notes.length === 0 ? (
+          <p className="text-xs text-slate-400 italic" role="status">
+            No notes recorded for this patient.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-4">
+            {notes.map((note) => (
+              <article
+                key={note.note_id}
+                className="border-b last:border-0 pb-3 last:pb-0"
+                aria-labelledby={`note-title-${note.note_id}`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <p
+                    id={`note-title-${note.note_id}`}
+                    className="font-bold text-primary text-[11px] uppercase tracking-tight mb-1"
                   >
-                    <Pencil className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                    onClick={() => handleDelete(note)}
-                    aria-label={`Delete note: ${note.note_title || "General Note"}`}
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
+                    {note.note_title || "General Note"}
+                  </p>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                      onClick={() => handleEdit(note)}
+                      aria-label={`Edit note: ${
+                        note.note_title || "General Note"
+                      }`}
+                    >
+                      <Pencil className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                      onClick={() => handleDelete(note)}
+                      aria-label={`Delete note: ${
+                        note.note_title || "General Note"
+                      }`}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
 
-              <p className="text-slate-700 leading-relaxed mb-1">
-                {note.note_content}
-              </p>
-              <p className="text-muted-foreground text-[11px]">
-                <time dateTime={note.created_at}>
-                  {new Date(note.created_at).toLocaleDateString(undefined, {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </time>
-              </p>
-            </article>
-          ))}
-        </div>
-      )}
+                <p className="text-xs text-slate-700 leading-relaxed mb-1">
+                  {note.note_content}
+                </p>
+                <p className="text-muted-foreground text-[10px]">
+                  <time dateTime={note.created_at}>
+                    {new Date(note.created_at).toLocaleDateString(undefined, {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </time>
+                </p>
+              </article>
+            ))}
+          </div>
+        )}
+      </div>
 
       <NoteDialog
         open={noteDialogOpen}
