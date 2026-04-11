@@ -1,4 +1,4 @@
-import { AlertCircle, Activity, Heart, Siren, MapPin } from "lucide-react";
+import { AlertCircle, Activity, Heart, Siren } from "lucide-react";
 import { format } from "date-fns";
 
 interface VitalsSnapshot {
