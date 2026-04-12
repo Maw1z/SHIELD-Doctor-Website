@@ -15,7 +15,7 @@ The system is composed of two core components:
 By consolidating patient data into a single ecosystem, SHIELD eliminates fragmented workflows and **enables continuous, real-time healthcare monitoring**.
 
 ### Dashboard Overview
-<img width="1920" height="996" alt="image" src="https://github.com/user-attachments/assets/1b081b28-2341-4ff5-ba44-d525a0dee22f" />
+<img width="1600" height="829" alt="image" src="https://github.com/user-attachments/assets/9393520a-21ac-44c6-bafb-f5825d5ea1d2" />
 
 
 
