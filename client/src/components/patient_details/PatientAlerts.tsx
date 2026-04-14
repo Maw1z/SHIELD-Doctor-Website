@@ -167,7 +167,14 @@ export default function PatientAlerts({
             Vital Events
           </p>
           {alerts.map((alert) => {
-            const config = alertConfig[alert.alert_type];
+            // Fallback configuration if alert_type is missing from alertConfig
+            const config = alertConfig[alert.alert_type] || {
+              icon: AlertCircle,
+              label: alert.alert_type || "Unknown Alert",
+              text: "text-slate-600",
+              bg: "bg-slate-50",
+            };
+
             const Icon = config.icon;
 
             return (
