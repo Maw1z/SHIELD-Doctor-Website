@@ -1,4 +1,4 @@
-import { type ColumnDef } from "@tanstack/react-table";
+import { type ColumnDef, type Row } from "@tanstack/react-table";
 import { type Patient } from "@/constants/patients";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
@@ -15,6 +15,24 @@ const statusColors = {
   Low: "bg-green-500",
   Medium: "bg-yellow-500",
   High: "bg-red-500",
+};
+
+export const statusPriorityFn = (
+  rowA: Row<Patient>,
+  rowB: Row<Patient>,
+  columnId: string,
+) => {
+  const priority: Record<string, number> = {
+    High: 0,
+    Medium: 1,
+    Low: 2,
+    Stable: 3,
+  };
+
+  const aPriority = priority[rowA.getValue(columnId) as string] ?? 99;
+  const bPriority = priority[rowB.getValue(columnId) as string] ?? 99;
+
+  return aPriority - bPriority;
 };
 
 export const allColumns: ColumnDef<Patient>[] = [
@@ -44,7 +62,7 @@ export const allColumns: ColumnDef<Patient>[] = [
     accessorKey: "risk_label",
     id: "status",
     header: "Status",
-    sortingFn: "alphanumeric",
+    sortingFn: statusPriorityFn,
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
 
